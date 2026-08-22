@@ -18,7 +18,7 @@ async function getAuthToken() {
       console.warn(err.message);
       throw err;
     }
-    const token = await user.getIdToken(true); // Force refresh of the token
+    const token = await user.getIdToken(true); // Force refresh of the 
     return token;
   } catch (error) {
     console.error("Failed to get auth token:", error);
