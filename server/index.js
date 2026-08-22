@@ -27,6 +27,7 @@ app.use(cors({
 }));
 app.use(express.json());
 
+app.set("trust proxy", 2);
 // Rate limiting middleware
 // General API rate limit - 100 requests per 15 minutes per IP
 const apiLimiter = rateLimit({
