@@ -14,6 +14,9 @@ const ChatMessage = require('./models/ChatMessage');
 const { isDevAuthBypassEnabled } = require('./utils/devAuth');
 
 const app = express();
+
+app.set("trust proxy", 2); // Trust first two proxies (useful if behind a reverse proxy)
+
 app.use(cors({
   origin: [
     'http://localhost:5173',
@@ -27,7 +30,7 @@ app.use(cors({
 }));
 app.use(express.json());
 
-app.set("trust proxy", 2);
+
 // Rate limiting middleware
 // General API rate limit - 100 requests per 15 minutes per IP
 const apiLimiter = rateLimit({
@@ -47,7 +50,7 @@ const writeLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// --- Your existing routers here ---
+// Routes
 const roomsRouter = require('./routes/rooms');
 const choresRouter = require('./routes/chores');
 const expensesRouter = require('./routes/expenses');
