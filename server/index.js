@@ -30,22 +30,22 @@ app.use(express.json());
 app.set("trust proxy", 2);
 // Rate limiting middleware
 // General API rate limit - 100 requests per 15 minutes per IP
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-});
+// const apiLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 100, // Limit each IP to 100 requests per windowMs
+//   message: 'Too many requests from this IP, please try again later.',
+//   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+//   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+// });
 
 // Stricter rate limit for write operations - 30 requests per 15 minutes
-const writeLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 30, // Limit each IP to 30 write requests per windowMs
-  message: 'Too many requests, please slow down.',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+// const writeLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 1000, // Limit each IP to 1000 write requests per windowMs
+//   message: 'Too many requests, please slow down.',
+//   standardHeaders: true,
+//   legacyHeaders: false,
+// });
 
 // --- Your existing routers here ---
 const roomsRouter = require('./routes/rooms');
