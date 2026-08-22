@@ -2,8 +2,17 @@ import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { auth } from "../firebase";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000/api";
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+const DEFAULT_API_BASE =
+  typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    ? "http://localhost:5000/api"
+    : `${window.location.origin}/api`;
+
+const API_BASE = import.meta.env.VITE_API_BASE || DEFAULT_API_BASE;
+const DEFAULT_SOCKET_URL =
+  typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    ? "http://localhost:5000"
+    : window.location.origin;
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || DEFAULT_SOCKET_URL;
 
 function ChatRoom({ roomId, currentUser, initialMessages = [], room }) {
   const [messages, setMessages] = useState(initialMessages);
