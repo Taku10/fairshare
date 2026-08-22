@@ -14,7 +14,17 @@ const ChatMessage = require('./models/ChatMessage');
 const { isDevAuthBypassEnabled } = require('./utils/devAuth');
 
 const app = express();
-app.use(cors({ origin: /localhost/, credentials: true }));
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'https://fairshare.takunda.cloud',
+    'https://fareshare-20b22.firebaseapp.com'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // Rate limiting middleware
@@ -66,7 +76,10 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     // Allow both common Vite ports
-    origin: ['http://localhost:5173', 'http://localhost:5174'],
+    origin: ['http://localhost:5173',
+    'http://localhost:5174',
+    'https://fairshare.takunda.cloud',
+    'https://fareshare-20b22.firebaseapp.com'],
     methods: ['GET', 'POST'],
     credentials: true,
   },
