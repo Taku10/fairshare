@@ -57,11 +57,18 @@ router.get('/', async (req, res) => {
 // Update a chore by id
 router.put('/:id', async (req, res) => {
   try {
-    const { title, assignedTo, completed } = req.body;
+    const { title, assignedTo, completed, roomId } = req.body;
+
+    if (!/^[a-f\d]{24}$/i.test(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid chore ID' });
+    }
     
     // Build update object with only allowed fields
     const updateFields = {};
     if (title !== undefined) {
+      if (typeof title !== 'string') {
+        return res.status(400).json({ error: 'Title must be a string' });
+      }
       const trimmedTitle = String(title).trim();
       if (!trimmedTitle) {
         return res.status(400).json({ error: 'Title cannot be empty' });
@@ -69,11 +76,27 @@ router.put('/:id', async (req, res) => {
       updateFields.title = trimmedTitle.substring(0, 100);
     }
     if (assignedTo !== undefined) {
+      let assignedToId = assignedTo;
+
+      // Accept populated object format: { _id: "..." }
+      if (assignedToId && typeof assignedToId === 'object') {
+        if (!Object.prototype.hasOwnProperty.call(assignedToId, '_id')) {
+          return res.status(400).json({ error: 'Invalid assignedTo format' });
+        }
+        assignedToId = assignedToId._id;
+      }
+      if (assignedToId && typeof assignedToId !== 'string') {
+        assignedToId = String(assignedToId);
+      }
+
       // Allow null/empty to unassign, otherwise validate ObjectId format
-      if (assignedTo && (typeof assignedTo !== 'string' || !/^[a-f\d]{24}$/i.test(assignedTo))) {
+      if (assignedToId && (typeof assignedToId !== 'string' || !/^[a-f\d]{24}$/i.test(assignedToId))) {
         return res.status(400).json({ error: 'Invalid assignedTo ID' });
       }
-      updateFields.assignedTo = assignedTo || null;
+      updateFields.assignedTo = assignedToId || null;
+    }
+    if (roomId !== undefined && roomId && !/^[a-f\d]{24}$/i.test(roomId)) {
+      return res.status(400).json({ error: 'Invalid room ID' });
     }
     if (completed !== undefined) {
       updateFields.completed = Boolean(completed);
@@ -91,7 +114,10 @@ router.put('/:id', async (req, res) => {
     
     res.json(updated);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    if (err.name === 'ValidationError' || err.name === 'CastError') {
+      return res.status(400).json({ error: err.message });
+    }
+    res.status(500).json({ error: 'Failed to update chore' });
   }
 });
 
