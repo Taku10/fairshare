@@ -69,7 +69,7 @@ router.put('/:id', async (req, res) => {
       if (typeof title !== 'string') {
         return res.status(400).json({ error: 'Title must be a string' });
       }
-      const trimmedTitle = String(title).trim();
+      const trimmedTitle = title.trim();
       if (!trimmedTitle) {
         return res.status(400).json({ error: 'Title cannot be empty' });
       }
@@ -84,19 +84,35 @@ router.put('/:id', async (req, res) => {
           return res.status(400).json({ error: 'Invalid assignedTo format' });
         }
         assignedToId = assignedToId._id;
+        if (!assignedToId) {
+          return res.status(400).json({ error: 'Invalid assignedTo format' });
+        }
       }
       if (assignedToId && typeof assignedToId !== 'string') {
-        assignedToId = String(assignedToId);
+        return res.status(400).json({ error: 'Invalid assignedTo ID' });
       }
 
       // Allow null/empty to unassign, otherwise validate ObjectId format
-      if (assignedToId && (typeof assignedToId !== 'string' || !/^[a-f\d]{24}$/i.test(assignedToId))) {
+      if (assignedToId && !/^[a-f\d]{24}$/i.test(assignedToId)) {
         return res.status(400).json({ error: 'Invalid assignedTo ID' });
       }
       updateFields.assignedTo = assignedToId || null;
     }
-    if (roomId !== undefined && roomId && !/^[a-f\d]{24}$/i.test(roomId)) {
-      return res.status(400).json({ error: 'Invalid room ID' });
+    if (roomId !== undefined) {
+      let roomIdValue = roomId;
+      if (roomIdValue && typeof roomIdValue === 'object') {
+        if (!Object.prototype.hasOwnProperty.call(roomIdValue, '_id')) {
+          return res.status(400).json({ error: 'Invalid room ID format' });
+        }
+        roomIdValue = roomIdValue._id;
+      }
+      if (roomIdValue && typeof roomIdValue !== 'string') {
+        return res.status(400).json({ error: 'Invalid room ID' });
+      }
+      if (!roomIdValue || !/^[a-f\d]{24}$/i.test(roomIdValue)) {
+        return res.status(400).json({ error: 'Invalid room ID' });
+      }
+      updateFields.roomId = roomIdValue;
     }
     if (completed !== undefined) {
       updateFields.completed = Boolean(completed);
@@ -104,7 +120,7 @@ router.put('/:id', async (req, res) => {
     
     const updated = await Chore.findByIdAndUpdate(
       req.params.id,
-      updateFields,
+      { $set: updateFields },
       { new: true, runValidators: true }
     ).populate('assignedTo');
     
