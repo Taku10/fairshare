@@ -44,7 +44,7 @@ const apiLimiter = rateLimit({
 // Stricter rate limit for write operations - 30 requests per 15 minutes
 const writeLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 30, // Limit each IP to 30 write requests per windowMs
+  max: 1000, // Limit each IP to 1000 write requests per windowMs
   message: 'Too many requests, please slow down.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -108,14 +108,20 @@ io.use(async (socket, next) => {
       decoded = await admin.auth().verifyIdToken(token);
     }
 
-    let roommate = await Roommate.findOne({ firebaseUid: decoded.uid });
-    if (!roommate) {
-      roommate = await Roommate.create({
-        firebaseUid: decoded.uid,
-        email: decoded.email,
-        displayName: decoded.name || decoded.email.split('@')[0],
-      });
-    }
+    const roommate = await Roommate.findOneAndUpdate(
+      { firebaseUid: decoded.uid },
+      {
+        $setOnInsert: {
+          firebaseUid: decoded.uid,
+          email: decoded.email,
+          displayName: decoded.name || decoded.email.split('@')[0],
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+      }
+    );
 
     socket.user = {
       roommateId: roommate._id,
