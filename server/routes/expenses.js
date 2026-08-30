@@ -171,14 +171,20 @@ router.get('/balances/summary', async (req, res) => {
     const balances = {};
 
     for (const exp of expenses) {
-      const share = exp.amount / exp.splitBetween.length;
+      // Skip expenses with missing/deleted paidBy reference
+      if (!exp.paidBy) continue;
+
+      const validSplit = (exp.splitBetween || []).filter(Boolean);
+      if (validSplit.length === 0) continue;
+
+      const share = exp.amount / validSplit.length;
       const payerId = String(exp.paidBy._id);
 
       // make sure payer exists in balances
       balances[payerId] = (balances[payerId] || 0);
 
       // each participant owes "share"
-      for (const rm of exp.splitBetween) {
+      for (const rm of validSplit) {
         const rmId = String(rm._id);
         balances[rmId] = (balances[rmId] || 0);
 
