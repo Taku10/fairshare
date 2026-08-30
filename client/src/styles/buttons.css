@@ -26,7 +26,7 @@
 
 .btn-danger {
   background: rgba(248, 113, 113, 0.15);
-  color: #dc2626;
+  color: #b91c1c;
   border: 1px solid rgba(248, 113, 113, 0.3);
 }
 
@@ -38,7 +38,7 @@
 
 .btn-success {
   background: rgba(34, 197, 94, 0.15);
-  color: #16a34a;
+  color: #15803d;
   border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
@@ -49,10 +49,9 @@
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.08);
+  background: #ffffff;
   color: var(--text-dark);
   border: 1px solid var(--border);
-  backdrop-filter: blur(10px);
 }
 
 .btn-secondary:hover {

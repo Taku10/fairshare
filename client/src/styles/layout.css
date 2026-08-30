@@ -1,20 +1,17 @@
 .app-container {
   min-height: 100vh;
-  background: radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.15), transparent 40%),
-    radial-gradient(circle at 80% 0%, rgba(16, 185, 129, 0.12), transparent 35%),
-    radial-gradient(circle at 50% 100%, rgba(236, 72, 153, 0.1), transparent 40%),
-    linear-gradient(160deg, #1e293b 0%, #1e293b 40%, #334155 60%, #1e293b 100%);
+  background: #f4f7fb;
   position: relative;
   overflow-x: hidden;
 }
 
 .app-header {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #6d28d9 100%);
   backdrop-filter: blur(20px);
   color: white;
-  padding: 3rem 1rem;
+  padding: 2rem 1rem;
   text-align: center;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3), 0 0 40px rgba(102, 126, 234, 0.2);
+  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.16);
   position: relative;
   overflow: hidden;
   border-bottom: 1px solid rgba(102, 126, 234, 0.3);
@@ -27,7 +24,7 @@
   right: -10%;
   width: 300px;
   height: 300px;
-  background: rgba(102, 126, 234, 0.15);
+  background: rgba(255, 255, 255, 0.16);
   border-radius: 50%;
   filter: blur(60px);
   animation: headerGlow 8s ease-in-out infinite alternate;
@@ -61,25 +58,23 @@
 .tab-navigation {
   display: flex;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 1.5rem 1rem;
-  background: rgba(30, 41, 59, 0.5);
-  backdrop-filter: blur(20px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  gap: 0.4rem;
+  padding: 0.6rem;
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
   position: sticky;
   top: 0;
   z-index: 100;
-  max-width: 900px;
-  margin: 0 auto;
-  border-radius: 0 0 12px 12px;
-  border: 1px solid rgba(102, 126, 234, 0.2);
-  border-top: none;
+  max-width: 760px;
+  margin: 1rem auto 0;
+  border-radius: 14px;
+  border: 1px solid var(--border);
 }
 
 .tab-button {
   padding: 0.75rem 1.5rem;
-  border: 1px solid rgba(102, 126, 234, 0.3);
-  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid transparent;
+  background: transparent;
   color: var(--text-dark);
   border-radius: 8px;
   cursor: pointer;
@@ -87,14 +82,13 @@
   font-size: 0.95rem;
   transition: all 0.3s ease;
   position: relative;
-  backdrop-filter: blur(10px);
 }
 
 .tab-button:hover {
   border-color: var(--primary);
   background: rgba(102, 126, 234, 0.15);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: none;
 }
 
 .tab-button.active {
@@ -114,13 +108,13 @@
   background: var(--bg-card);
   backdrop-filter: blur(20px);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 14px;
   padding: 2rem;
   box-shadow: var(--shadow-sm), var(--shadow-glow);
   margin-bottom: 2rem;
   animation: fadeIn 0.3s ease;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .section::before {
