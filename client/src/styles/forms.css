@@ -9,13 +9,12 @@
 .form-select,
 .form-textarea {
   padding: 0.75rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
   font-size: 0.95rem;
   font-family: inherit;
-  transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background: #ffffff;
   color: var(--text-dark);
 }
 
@@ -38,7 +37,7 @@ input[type="number"] {
 
 /* Style select dropdown options */
 .form-select option {
-  background: var(--bg-dark);
+  background: #ffffff;
   color: var(--text-dark);
   padding: 0.5rem;
 }
@@ -47,7 +46,7 @@ input[type="number"] {
 .form-select::placeholder,
 .form-textarea::placeholder {
   color: var(--text-light);
-  opacity: 0.7;
+  opacity: 1;
 }
 
 .form-input:focus,
@@ -55,8 +54,15 @@ input[type="number"] {
 .form-textarea:focus {
   outline: none;
   border-color: var(--primary);
-  background: rgba(102, 126, 234, 0.1);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2), 0 0 20px rgba(102, 126, 234, 0.3);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.14);
+}
+
+.form-input:disabled,
+.form-select:disabled,
+.form-textarea:disabled {
+  background: #f1f5f9;
+  color: #64748b;
 }
 
 .form-input {
