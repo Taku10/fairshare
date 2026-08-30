@@ -14,8 +14,22 @@ const ChatMessage = require('./models/ChatMessage');
 const { isDevAuthBypassEnabled } = require('./utils/devAuth');
 
 const app = express();
-app.use(cors({ origin: /localhost/, credentials: true }));
+
+app.set("trust proxy", 2); // Trust first two proxies (useful if behind a reverse proxy)
+
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'https://fairshare.takunda.cloud',
+    'https://fareshare-20b22.firebaseapp.com'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
+
 
 // Rate limiting middleware
 // General API rate limit - 100 requests per 15 minutes per IP
@@ -30,13 +44,13 @@ const apiLimiter = rateLimit({
 // Stricter rate limit for write operations - 30 requests per 15 minutes
 const writeLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 30, // Limit each IP to 30 write requests per windowMs
+  max: 1000, // Limit each IP to 1000 write requests per windowMs
   message: 'Too many requests, please slow down.',
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-// --- Your existing routers here ---
+// Routes
 const roomsRouter = require('./routes/rooms');
 const choresRouter = require('./routes/chores');
 const expensesRouter = require('./routes/expenses');
@@ -66,7 +80,10 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     // Allow both common Vite ports
-    origin: ['http://localhost:5173', 'http://localhost:5174'],
+    origin: ['http://localhost:5173',
+    'http://localhost:5174',
+    'https://fairshare.takunda.cloud',
+    'https://fareshare-20b22.firebaseapp.com'],
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -91,14 +108,20 @@ io.use(async (socket, next) => {
       decoded = await admin.auth().verifyIdToken(token);
     }
 
-    let roommate = await Roommate.findOne({ firebaseUid: decoded.uid });
-    if (!roommate) {
-      roommate = await Roommate.create({
-        firebaseUid: decoded.uid,
-        email: decoded.email,
-        displayName: decoded.name || decoded.email.split('@')[0],
-      });
-    }
+    const roommate = await Roommate.findOneAndUpdate(
+      { firebaseUid: decoded.uid },
+      {
+        $setOnInsert: {
+          firebaseUid: decoded.uid,
+          email: decoded.email,
+          displayName: decoded.name || decoded.email.split('@')[0],
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+      }
+    );
 
     socket.user = {
       roommateId: roommate._id,

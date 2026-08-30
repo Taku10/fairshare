@@ -2,7 +2,12 @@
 import axios from "axios";
 import { auth } from "./firebase";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000/api";
+const DEFAULT_API_BASE =
+  typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    ? "http://localhost:5000/api"
+    : `${window.location.origin}/api`;
+
+const API_BASE = import.meta.env.VITE_API_BASE || DEFAULT_API_BASE;
 
 // Helper to get token from current user
 async function getAuthToken() {
@@ -13,7 +18,7 @@ async function getAuthToken() {
       console.warn(err.message);
       throw err;
     }
-    const token = await user.getIdToken(true); // Force refresh
+    const token = await user.getIdToken(true); // Force refresh of the 
     return token;
   } catch (error) {
     console.error("Failed to get auth token:", error);

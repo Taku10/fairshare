@@ -11,14 +11,20 @@ async function devBypass(req, res, next) {
   const devName = process.env.DEV_NAME || 'Dev User';
 
   try {
-    let roommate = await Roommate.findOne({ firebaseUid: devUid });
-    if (!roommate) {
-      roommate = await Roommate.create({
-        firebaseUid: devUid,
-        email: devEmail,
-        displayName: devName,
-      });
-    }
+    const roommate = await Roommate.findOneAndUpdate(
+      { firebaseUid: devUid },
+      {
+        $setOnInsert: {
+          firebaseUid: devUid,
+          email: devEmail,
+          displayName: devName,
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+      }
+    );
 
     req.user = {
       firebaseUid: devUid,
@@ -52,14 +58,20 @@ async function authMiddleware(req, res, next) {
     // decoded: { uid, email, name, ... }
 
     // Find or create Roommate
-    let roommate = await Roommate.findOne({ firebaseUid: decoded.uid });
-    if (!roommate) {
-      roommate = await Roommate.create({
-        firebaseUid: decoded.uid,
-        email: decoded.email,
-        displayName: decoded.name || decoded.email.split('@')[0],
-      });
-    }
+    const roommate = await Roommate.findOneAndUpdate(
+      { firebaseUid: decoded.uid },
+      {
+        $setOnInsert: {
+          firebaseUid: decoded.uid,
+          email: decoded.email,
+          displayName: decoded.name || decoded.email.split('@')[0],
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+      }
+    );
 
     req.user = {
       firebaseUid: decoded.uid,
