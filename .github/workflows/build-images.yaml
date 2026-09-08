@@ -32,13 +32,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set short SHA 
+        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+
       - name: Build and push client
         uses: docker/build-push-action@v7
         with:
           context: ./client
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/taku10/fairshare-client:latest
+          tags: ghcr.io/taku10/fairshare-client:${{ env.SHORT_SHA }}
           build-args: |
             VITE_API_BASE=${{ secrets.VITE_API_BASE }}
             VITE_FIREBASE_API_KEY=${{ secrets.VITE_FIREBASE_API_KEY }}
@@ -55,4 +58,4 @@ jobs:
           context: ./server
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/taku10/fairshare-server:latest
+          tags: ghcr.io/taku10/fairshare-server:${{ env.SHORT_SHA }}
