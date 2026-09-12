@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import AuthPage from "./AuthPage.jsx"; // login/register screen
 import LandingPage from "./LandingPage.jsx";
-import RoomApp from "./RoomApp.jsx";
+import FairShareApp from "./FairShareApp.jsx";
 
 function App() {
   const [showAuth, setShowAuth] = useState(false);
@@ -27,7 +27,7 @@ function App() {
   }
 
   // Logged in -> show the real app
-  return <RoomApp currentUser={currentUser} />;
+  return <FairShareApp currentUser={currentUser} />;
 }
 
 export default App;

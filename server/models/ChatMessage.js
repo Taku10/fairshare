@@ -2,7 +2,9 @@
 const mongoose = require('mongoose');
 
 const chatMessageSchema = new mongoose.Schema({
-  roomId: { type: mongoose.Schema.Types.ObjectId, ref: 'Room', required: true },
+  householdId: { type: mongoose.Schema.Types.ObjectId, ref: 'Household', required: true },
+  // Remove after #108 migrates existing chat messages.
+  roomId: { type: mongoose.Schema.Types.ObjectId, ref: 'Household' },
   sender: { type: mongoose.Schema.Types.ObjectId, ref: 'Roommate', required: true },
   text: { type: String, required: true },
   relatedType: { type: String, enum: ['chore', 'expense', null], default: null },

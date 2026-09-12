@@ -1,7 +1,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const Roommate = require('../models/Roommate');
-const Room = require('../models/Room');
+const Household = require('../models/Household');
 const Expense = require('../models/Expense');
 const Chore = require('../models/Chore');
 const ChatMessage = require('../models/ChatMessage');
@@ -34,7 +34,7 @@ async function main() {
   if (CLEAR) {
     await Promise.all([
       Roommate.deleteMany({}),
-      Room.deleteMany({}),
+      Household.deleteMany({}),
       Expense.deleteMany({}),
       Chore.deleteMany({}),
       ChatMessage.deleteMany({}),
@@ -42,14 +42,14 @@ async function main() {
     console.log('Cleared collections');
   }
 
-  // Fix existing rooms with null code to avoid unique index conflicts
-  const roomsWithNullCode = await Room.find({ code: null });
-  for (const r of roomsWithNullCode) {
-    r.code = randomCode('ROOM');
-    await r.save();
+  // Fix existing households with null codes to avoid unique index conflicts
+  const householdsWithNullCode = await Household.find({ code: null });
+  for (const household of householdsWithNullCode) {
+    household.code = randomCode('HOUSEHOLD');
+    await household.save();
   }
-  if (roomsWithNullCode.length) {
-    console.log(`Updated ${roomsWithNullCode.length} existing rooms with new codes to satisfy unique index`);
+  if (householdsWithNullCode.length) {
+    console.log(`Updated ${householdsWithNullCode.length} existing households with new codes to satisfy unique index`);
   }
 
   // Seed roommates
@@ -69,31 +69,31 @@ async function main() {
   }
   console.log(`Seeded roommates: ${roommates.length}`);
 
-  // Create rooms
-  const rooms = [];
-  const roomNames = ['Default Room','Unit A','Unit B'];
-  for (const rn of roomNames) {
+  // Create households
+  const households = [];
+  const householdNames = ['Default Household','Unit A','Unit B'];
+  for (const householdName of householdNames) {
     const members = roommates
       .sort(() => 0.5 - Math.random())
       .slice(0, Math.max(3, Math.floor(Math.random()* roommates.length)))
       .map(r => r._id);
-    const room = await Room.create({ name: rn, code: randomCode('ROOM'), createdBy: members[0], members });
-    rooms.push(room);
+    const household = await Household.create({ name: householdName, code: randomCode('HOUSEHOLD'), createdBy: members[0], members });
+    households.push(household);
   }
-  console.log(`Seeded rooms: ${rooms.length}`);
+  console.log(`Seeded households: ${households.length}`);
 
   // Seed expenses (~40)
   const expenseTitles = ['Rent','Internet','Groceries','Utilities','Water','Trash','Takeout','Ride-share','Streaming','Supplies','Snacks','Coffee'];
   const expenses = [];
   for (let i = 0; i < 42; i++) {
-    const room = sample(rooms);
+    const household = sample(households);
     const splitBetween = roommates
       .sort(() => 0.5 - Math.random())
       .slice(0, Math.floor(Math.random()*4)+2) // 2-5 people
       .map(r => r._id);
     const paidBy = sample(splitBetween);
     const exp = await Expense.create({
-      roomId: room._id,
+      householdId: household._id,
       description: sample(expenseTitles),
       amount: randomAmount(8, 1200),
       paidBy,
@@ -108,10 +108,10 @@ async function main() {
   const choreTitles = ['Dishes','Vacuum','Mop kitchen','Clean bathroom','Take out trash','Wipe counters','Laundry','Restock supplies','Water plants','Organize fridge','Sweep porch','Dust living room'];
   const chores = [];
   for (let i = 0; i < 40; i++) {
-    const room = sample(rooms);
+    const household = sample(households);
     const assignedTo = Math.random() > 0.2 ? sample(roommates)._id : undefined;
     const chore = await Chore.create({
-      roomId: room._id,
+      householdId: household._id,
       title: sample(choreTitles),
       frequency: sample(['once','daily','weekly','monthly']),
       assignedTo,
@@ -136,10 +136,10 @@ async function main() {
     'Rent reminder.',
   ];
   for (let i = 0; i < 25; i++) {
-    const room = sample(rooms);
+    const household = sample(households);
     const sender = sample(roommates)._id;
     const msg = await ChatMessage.create({
-      roomId: room._id,
+      householdId: household._id,
       sender,
       text: sample(chatTexts),
       createdAt: randomDate(),
@@ -151,7 +151,7 @@ async function main() {
   // Summary counts
   const counts = {
     roommates: await Roommate.countDocuments(),
-    rooms: await Room.countDocuments(),
+    households: await Household.countDocuments(),
     expenses: await Expense.countDocuments(),
     chores: await Chore.countDocuments(),
     messages: await ChatMessage.countDocuments(),

@@ -8,7 +8,7 @@ import ExpensesSection from "./components/ExpensesSection";
 import ProfileSection from "./components/ProfileSection";
 import RoommatesSection from "./components/RoommatesSection";
 
-function RoomApp() {
+function FairShareApp() {
   const [activeTab, setActiveTab] = useState("chores");
   const [showProfile, setShowProfile] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
@@ -238,4 +238,4 @@ function RoomApp() {
     </div>
   );
 }
-export default RoomApp;
+export default FairShareApp;

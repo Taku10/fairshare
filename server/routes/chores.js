@@ -2,20 +2,20 @@
 const express = require('express');
 const router = express.Router();
 const Chore = require('../models/Chore');
-const Room = require('../models/Room');
+const Household = require('../models/Household');
 
-async function getOrCreateDefaultRoomFor(roommateId) {
-  let room = await Room.findOne({ name: 'Default Room' });
-  if (!room) {
-    room = await Room.create({ name: 'Default Room', createdBy: roommateId, members: [roommateId] });
+async function getOrCreateDefaultHouseholdFor(roommateId) {
+  let household = await Household.findOne({ name: { $in: ['Default Household', 'Default Room'] } });
+  if (!household) {
+    household = await Household.create({ name: 'Default Household', createdBy: roommateId, members: [roommateId] });
   } else {
-    const isMember = room.members.some((m) => String(m) === String(roommateId));
+    const isMember = household.members.some((m) => String(m) === String(roommateId));
     if (!isMember) {
-      room.members.push(roommateId);
-      await room.save();
+      household.members.push(roommateId);
+      await household.save();
     }
   }
-  return room;
+  return household;
 }
 
 //So this is where all all the CRUD operations will go for chores
@@ -30,10 +30,9 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Title is required' });
     }
 
-    // Ensure a roomId exists; assign default room if missing and add current user as member
-    if (!req.body.roomId) {
-      const defaultRoom = await getOrCreateDefaultRoomFor(req.user.roommateId);
-      req.body.roomId = defaultRoom._id;
+    if (!req.body.householdId) {
+      const defaultHousehold = await getOrCreateDefaultHouseholdFor(req.user.roommateId);
+      req.body.householdId = defaultHousehold._id;
     }
 
     const chore = await Chore.create(req.body);
@@ -57,7 +56,7 @@ router.get('/', async (req, res) => {
 // Update a chore by id
 router.put('/:id', async (req, res) => {
   try {
-    const { title, assignedTo, completed, roomId } = req.body;
+    const { title, assignedTo, completed, householdId } = req.body;
 
     if (!/^[a-f\d]{24}$/i.test(req.params.id)) {
       return res.status(400).json({ error: 'Invalid chore ID' });
@@ -98,21 +97,21 @@ router.put('/:id', async (req, res) => {
       }
       updateFields.assignedTo = assignedToId || null;
     }
-    if (roomId !== undefined) {
-      let roomIdValue = roomId;
-      if (roomIdValue && typeof roomIdValue === 'object') {
-        if (!Object.prototype.hasOwnProperty.call(roomIdValue, '_id')) {
-          return res.status(400).json({ error: 'Invalid room ID format' });
+    if (householdId !== undefined) {
+      let householdIdValue = householdId;
+      if (householdIdValue && typeof householdIdValue === 'object') {
+        if (!Object.prototype.hasOwnProperty.call(householdIdValue, '_id')) {
+          return res.status(400).json({ error: 'Invalid household ID format' });
         }
-        roomIdValue = roomIdValue._id;
+        householdIdValue = householdIdValue._id;
       }
-      if (roomIdValue && typeof roomIdValue !== 'string') {
-        return res.status(400).json({ error: 'Invalid room ID' });
+      if (householdIdValue && typeof householdIdValue !== 'string') {
+        return res.status(400).json({ error: 'Invalid household ID' });
       }
-      if (!roomIdValue || !/^[a-f\d]{24}$/i.test(roomIdValue)) {
-        return res.status(400).json({ error: 'Invalid room ID' });
+      if (!householdIdValue || !/^[a-f\d]{24}$/i.test(householdIdValue)) {
+        return res.status(400).json({ error: 'Invalid household ID' });
       }
-      updateFields.roomId = roomIdValue;
+      updateFields.householdId = householdIdValue;
     }
     if (completed !== undefined) {
       updateFields.completed = Boolean(completed);

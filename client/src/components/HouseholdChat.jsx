@@ -14,7 +14,7 @@ const DEFAULT_SOCKET_URL =
     : window.location.origin;
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || DEFAULT_SOCKET_URL;
 
-function ChatRoom({ roomId, currentUser, initialMessages = [], room }) {
+function HouseholdChat({ householdId, currentUser, initialMessages = [], household }) {
   const [messages, setMessages] = useState(initialMessages);
   const [text, setText] = useState("");
   const socketRef = useRef(null);
@@ -25,7 +25,7 @@ function ChatRoom({ roomId, currentUser, initialMessages = [], room }) {
     const msgs = Array.isArray(initialMessages) ? initialMessages : [];
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMessages(msgs);
-  }, [roomId, initialMessages]);
+  }, [householdId, initialMessages]);
 
   // Socket lifecycle per room
   useEffect(() => {
@@ -42,7 +42,7 @@ function ChatRoom({ roomId, currentUser, initialMessages = [], room }) {
 
       socket.on("connect", () => {
         console.log("Connected to socket");
-        socket.emit("joinRoom", roomId);
+        socket.emit("joinHousehold", householdId);
       });
 
       socket.on("chatMessage", (msg) => {
@@ -64,7 +64,7 @@ function ChatRoom({ roomId, currentUser, initialMessages = [], room }) {
         socketRef.current.disconnect();
       }
     };
-  }, [roomId, currentUser]);
+  }, [householdId, currentUser]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -76,7 +76,7 @@ function ChatRoom({ roomId, currentUser, initialMessages = [], room }) {
     if (!socketRef.current) return; // socket not ready yet
 
     socketRef.current.emit("sendMessage", {
-      roomId,
+      householdId,
       text,
       // optional:
       // relatedType: "chore",
@@ -99,14 +99,14 @@ function ChatRoom({ roomId, currentUser, initialMessages = [], room }) {
       <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid #e2e8f0', background: '#fff' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <div style={{ fontWeight: 700, fontSize: '1rem', color: '#0f172a' }}>{room?.name || 'Room Chat'}</div>
+            <div style={{ fontWeight: 700, fontSize: '1rem', color: '#0f172a' }}>{household?.name || 'Household Chat'}</div>
             <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: 2 }}>
-              {room?.members?.length || 0} member{room?.members?.length === 1 ? '' : 's'} • {messages.length} message{messages.length === 1 ? '' : 's'}
+              {household?.members?.length || 0} member{household?.members?.length === 1 ? '' : 's'} • {messages.length} message{messages.length === 1 ? '' : 's'}
             </div>
           </div>
-          {Array.isArray(room?.members) && room.members.length > 0 && (
+          {Array.isArray(household?.members) && household.members.length > 0 && (
             <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
-              {room.members.map((member) => {
+              {household.members.map((member) => {
                 const name = member?.displayName || member?.email?.split('@')[0] || 'User';
                 const initials = name.substring(0, 2).toUpperCase();
                 const messageCount = Array.isArray(messages) ? messages.filter(m => m.sender?._id === member._id).length : 0;
@@ -181,7 +181,7 @@ function ChatRoom({ roomId, currentUser, initialMessages = [], room }) {
                 </div>
                 <div>{m.text}</div>
                 <div style={{ fontSize: '0.72rem', opacity: mine ? 0.75 : 0.6, marginTop: 4 }}>
-                  Room: {m.roomId?.slice(-6) || roomId.slice(-6)}
+                  Household: {(m.householdId || m.roomId)?.slice(-6) || householdId.slice(-6)}
                 </div>
                 {m.relatedType && (
                   <div style={{ fontSize: '0.78rem', opacity: mine ? 0.85 : 0.65, marginTop: 6 }}>
@@ -212,4 +212,4 @@ function ChatRoom({ roomId, currentUser, initialMessages = [], room }) {
   );
 }
 
-export default ChatRoom;
+export default HouseholdChat;

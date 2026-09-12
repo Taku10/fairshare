@@ -4,25 +4,25 @@ Base URL (local default): `http://localhost:5000/api`
 
 All API endpoints require `Authorization: Bearer <firebase-id-token>` unless server dev auth bypass is enabled.
 
-## Rooms
+## Households
 
-### `POST /rooms`
-Create room.
+### `POST /households`
+Create a household.
 
-### `GET /rooms`
-List rooms where current user is a member.
+### `GET /households`
+List households where the current user is a member.
 
-### `GET /rooms/:roomId`
-Get room details.
+### `GET /households/:householdId`
+Get household details.
 
-### `POST /rooms/join/:code`
-Join room by invite code.
+### `POST /households/join/:code`
+Join a household by invite code.
 
-### `PUT /rooms/:roomId`
-Update room (creator only).
+### `PUT /households/:householdId`
+Update a household (creator only).
 
-### `DELETE /rooms/:roomId`
-Delete room (creator only).
+### `DELETE /households/:householdId`
+Delete a household (creator only).
 
 ## Roommates
 
@@ -47,7 +47,7 @@ Delete roommate by ID.
 ## Chores
 
 ### `POST /chores`
-Create chore. If `roomId` is omitted, a default room is created/used.
+Create a chore associated with a `householdId`.
 
 ### `GET /chores`
 List chores.
@@ -62,7 +62,7 @@ Delete chore.
 
 ### `POST /expenses`
 Create expense. Requires valid `description`, positive `amount`, and `paidBy`.
-If `roomId` is omitted, a default room is created/used.
+The request may include the owning `householdId`.
 
 ### `GET /expenses`
 List expenses.
@@ -104,18 +104,18 @@ Delete event.
 
 ## Chat (REST history endpoints)
 
-### `GET /chat/:roomId/chat`
-Get room message history (membership required).
+### `GET /chat/:householdId/chat`
+Get household message history (membership required).
 
-### `POST /chat/:roomId/chat`
-Create room message (membership required).
+### `POST /chat/:householdId/chat`
+Create household message (membership required).
 
 ## Socket.IO events
 
 After connecting with auth token:
 
-- Client emits `joinRoom(roomId)`
-- Client emits `sendMessage({ roomId, text, relatedType?, relatedId? })`
+- Client emits `joinHousehold(householdId)`
+- Client emits `sendMessage({ householdId, text, relatedType?, relatedId? })`
 - Server emits `chatMessage` with populated sender
 - Server may emit `errorMessage`
 
@@ -125,4 +125,3 @@ Configured in server:
 
 - General API: 100 requests / 15 minutes / IP
 - Write-heavy routes: 30 requests / 15 minutes / IP
-

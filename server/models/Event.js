@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
 
 const eventSchema = new mongoose.Schema({
-  roomId: { type: mongoose.Schema.Types.ObjectId, ref: 'Room', required: false, default: null },
+  householdId: { type: mongoose.Schema.Types.ObjectId, ref: 'Household', required: false, default: null },
+  // Remove after #108 migrates existing events.
+  roomId: { type: mongoose.Schema.Types.ObjectId, ref: 'Household' },
   title: { type: String, required: true },
   description: { type: String, default: '' },
   eventType: { 

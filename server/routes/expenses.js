@@ -3,20 +3,20 @@ const express = require('express');
 const router = express.Router();
 const Expense = require('../models/Expense');
 const Roommate = require('../models/Roommate');
-const Room = require('../models/Room');
+const Household = require('../models/Household');
 
-async function getOrCreateDefaultRoomFor(roommateId) {
-  let room = await Room.findOne({ name: 'Default Room' });
-  if (!room) {
-    room = await Room.create({ name: 'Default Room', createdBy: roommateId, members: [roommateId] });
+async function getOrCreateDefaultHouseholdFor(roommateId) {
+  let household = await Household.findOne({ name: { $in: ['Default Household', 'Default Room'] } });
+  if (!household) {
+    household = await Household.create({ name: 'Default Household', createdBy: roommateId, members: [roommateId] });
   } else {
-    const isMember = room.members.some((m) => String(m) === String(roommateId));
+    const isMember = household.members.some((m) => String(m) === String(roommateId));
     if (!isMember) {
-      room.members.push(roommateId);
-      await room.save();
+      household.members.push(roommateId);
+      await household.save();
     }
   }
-  return room;
+  return household;
 }
 
 // CREATE expense
@@ -49,12 +49,11 @@ router.post('/', async (req, res) => {
     req.body.amount = parsedAmount;
     req.body.splitBetween = splitBetween;
 
-    // Ensure a roomId exists; assign default room if missing and add current user as member
-    if (!req.body.roomId) {
-      console.log('   No roomId provided, creating/finding default room...');
-      const defaultRoom = await getOrCreateDefaultRoomFor(req.user.roommateId);
-      console.log('   Default room ID:', defaultRoom._id);
-      req.body.roomId = defaultRoom._id;
+    if (!req.body.householdId) {
+      console.log('   No household reference provided, creating/finding default household...');
+      const defaultHousehold = await getOrCreateDefaultHouseholdFor(req.user.roommateId);
+      console.log('   Default household ID:', defaultHousehold._id);
+      req.body.householdId = defaultHousehold._id;
     }
 
     console.log('   Creating expense with payload:', JSON.stringify(req.body, null, 2));
@@ -215,4 +214,3 @@ router.get('/balances/summary', async (req, res) => {
 });
 
 module.exports = router;
-    

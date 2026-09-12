@@ -1,6 +1,6 @@
 # FairShare
 
-FairShare is a full-stack roommate coordination app for managing chores, shared expenses, events, rooms, and chat in one place.
+FairShare is a full-stack household coordination app for managing chores, shared expenses, events, members, and chat in one place.
 
 > **Release status:** `v0.1.0` is an initial preview for one trusted household. Household isolation is not yet complete for chores, expenses, events, and roommate data. See the [v0.1.0 release notes](docs/releases/v0.1.0.md).
 
@@ -13,12 +13,12 @@ FairShare is a full-stack roommate coordination app for managing chores, shared 
 ## Core features
 
 - Email/password auth with Firebase
-- Room creation and joining via room code
+- Household creation and joining via invite code
 - Chore tracking and assignment
 - Expense tracking with balance summary
-- Roommate profiles
+- Member profiles
 - Event/calendar support (including unpaid bill events)
-- Real-time room chat via Socket.IO
+- Real-time household chat via Socket.IO
 
 ## Tech stack
 

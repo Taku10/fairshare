@@ -2,25 +2,30 @@
 const express = require('express');
 const router = express.Router({ mergeParams: true });
 const ChatMessage = require('../models/ChatMessage');
-const Room = require('../models/Room');
+const Household = require('../models/Household');
 
-async function ensureRoomMember(req, res, next) {
-  const roomId = req.params.roomId;
-  const room = await Room.findById(roomId);
-  if (!room) return res.status(404).json({ error: 'Room not found' });
+async function ensureHouseholdMember(req, res, next) {
+  const householdId = req.params.householdId;
+  const household = await Household.findById(householdId);
+  if (!household) return res.status(404).json({ error: 'Household not found' });
 
-  const isMember = room.members.some(
+  const isMember = household.members.some(
     (m) => String(m) === String(req.user.roommateId)
   );
-  if (!isMember) return res.status(403).json({ error: 'Not a member of this room' });
+  if (!isMember) return res.status(403).json({ error: 'Not a member of this household' });
 
   next();
 }
 
-// GET messages for a room
-router.get('/:roomId/chat', ensureRoomMember, async (req, res) => {
+// GET messages for a household
+router.get('/:householdId/chat', ensureHouseholdMember, async (req, res) => {
   try {
-    const messages = await ChatMessage.find({ roomId: req.params.roomId })
+    const messages = await ChatMessage.find({
+      $or: [
+        { householdId: req.params.householdId },
+        { roomId: req.params.householdId },
+      ],
+    })
       .sort({ createdAt: 1 })
       .populate('sender')
       .lean();
@@ -31,11 +36,11 @@ router.get('/:roomId/chat', ensureRoomMember, async (req, res) => {
 });
 
 // POST new message
-router.post('/:roomId/chat', ensureRoomMember, async (req, res) => {
+router.post('/:householdId/chat', ensureHouseholdMember, async (req, res) => {
   try {
     const { text, relatedType, relatedId } = req.body;
     const msg = await ChatMessage.create({
-      roomId: req.params.roomId,
+      householdId: req.params.householdId,
       sender: req.user.roommateId,
       text,
       relatedType: relatedType || null,
