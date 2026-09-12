@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 const ChatMessage = require('./models/ChatMessage');
-const Room = require('./models/Room');
+const Household = require('./models/Household');
 const Roommate = require('./models/Roommate');
 
 async function checkMessages() {
@@ -11,6 +11,7 @@ async function checkMessages() {
 
     const messages = await ChatMessage.find()
       .populate('sender')
+      .populate('householdId')
       .populate('roomId')
       .lean();
 
@@ -22,7 +23,8 @@ async function checkMessages() {
       messages.forEach((msg, index) => {
         console.log(`--- Message ${index + 1} ---`);
         console.log(`ID: ${msg._id}`);
-        console.log(`Room: ${msg.roomId?.name || msg.roomId || 'N/A'} (${msg.roomId?._id || 'N/A'})`);
+        const household = msg.householdId || msg.roomId;
+        console.log(`Household: ${household?.name || household || 'N/A'} (${household?._id || 'N/A'})`);
         console.log(`Sender: ${msg.sender?.displayName || msg.sender?.email || 'Unknown'} (${msg.sender?._id || 'N/A'})`);
         console.log(`Text: "${msg.text}"`);
         console.log(`Created: ${msg.createdAt}`);
@@ -33,10 +35,10 @@ async function checkMessages() {
       });
     }
 
-    const rooms = await Room.find().populate('members').lean();
-    console.log(`📦 Total rooms: ${rooms.length}`);
-    rooms.forEach(room => {
-      console.log(`  - ${room.name} (${room._id}): ${room.members?.length || 0} members`);
+    const households = await Household.find().populate('members').lean();
+    console.log(`📦 Total households: ${households.length}`);
+    households.forEach(household => {
+      console.log(`  - ${household.name} (${household._id}): ${household.members?.length || 0} members`);
     });
 
     const roommates = await Roommate.find().lean();

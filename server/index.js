@@ -9,7 +9,7 @@ const rateLimit = require('express-rate-limit');
 
 const admin = require('./firebaseAdmin');
 const Roommate = require('./models/Roommate');
-const Room = require('./models/Room');
+const Household = require('./models/Household');
 const ChatMessage = require('./models/ChatMessage');
 const { isDevAuthBypassEnabled } = require('./utils/devAuth');
 
@@ -51,7 +51,7 @@ const writeLimiter = rateLimit({
 });
 
 // Routes
-const roomsRouter = require('./routes/rooms');
+const householdsRouter = require('./routes/households');
 const choresRouter = require('./routes/chores');
 const expensesRouter = require('./routes/expenses');
 const roomatesRouter = require('./routes/roommates');
@@ -67,7 +67,7 @@ app.use('/api', apiLimiter);
 app.use('/api', authMiddleware);
 
 // Apply stricter rate limiting to write operations
-app.use('/api/rooms', writeLimiter, roomsRouter);
+app.use('/api/households', writeLimiter, householdsRouter);
 app.use('/api/chores', writeLimiter, choresRouter);
 app.use('/api/expenses', writeLimiter, expensesRouter);
 app.use('/api/roommates', writeLimiter, roomatesRouter);
@@ -136,27 +136,27 @@ io.use(async (socket, next) => {
   }
 });
 
-// helper to check room membership
-async function ensureSocketRoomMember(socket, roomId) {
-  const room = await Room.findById(roomId);
-  if (!room) throw new Error('Room not found');
-  const isMember = room.members.some(
+// Check membership before allowing a socket to use a household channel.
+async function ensureSocketHouseholdMember(socket, householdId) {
+  const household = await Household.findById(householdId);
+  if (!household) throw new Error('Household not found');
+  const isMember = household.members.some(
     (m) => String(m) === String(socket.user.roommateId)
   );
-  if (!isMember) throw new Error('Not a member of this room');
+  if (!isMember) throw new Error('Not a member of this household');
 }
 
 io.on('connection', (socket) => {
   console.log('🔌 Socket connected:', socket.user.displayName);
 
-  // join a room
-  socket.on('joinRoom', async (roomId) => {
+  // Join the Socket.IO room used internally for a household.
+  socket.on('joinHousehold', async (householdId) => {
     try {
-      await ensureSocketRoomMember(socket, roomId);
-      socket.join(roomId);
-      console.log(`${socket.user.displayName} joined room ${roomId}`);
+      await ensureSocketHouseholdMember(socket, householdId);
+      socket.join(householdId);
+      console.log(`${socket.user.displayName} joined household ${householdId}`);
     } catch (err) {
-      console.error('joinRoom error:', err.message);
+      console.error('joinHousehold error:', err.message);
       socket.emit('errorMessage', err.message);
     }
   });
@@ -164,13 +164,13 @@ io.on('connection', (socket) => {
   // send a message
   socket.on('sendMessage', async (payload) => {
     try {
-      const { roomId, text, relatedType, relatedId } = payload;
-      if (!text || !roomId) return;
+      const { householdId, text, relatedType, relatedId } = payload;
+      if (!text || !householdId) return;
 
-      await ensureSocketRoomMember(socket, roomId);
+      await ensureSocketHouseholdMember(socket, householdId);
 
       const msg = await ChatMessage.create({
-        roomId,
+        householdId,
         sender: socket.user.roommateId,
         text,
         relatedType: relatedType || null,
@@ -179,8 +179,8 @@ io.on('connection', (socket) => {
 
       const populated = await msg.populate('sender');
 
-      // broadcast to everyone in the room
-      io.to(roomId).emit('chatMessage', populated);
+      // Broadcast to the Socket.IO room for this household.
+      io.to(householdId).emit('chatMessage', populated);
     } catch (err) {
       console.error('sendMessage error:', err.message);
       socket.emit('errorMessage', err.message);

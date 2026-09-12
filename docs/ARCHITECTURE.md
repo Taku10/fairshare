@@ -9,7 +9,7 @@ FairShare is a two-service web application:
 - **Client:** React 19 and Vite, served as static files by Nginx in the container image.
 - **API:** Node.js, Express 5, Mongoose, and Socket.IO.
 - **Authentication:** Firebase Authentication in the browser; Firebase Admin verifies ID tokens in the API and Socket.IO handshake.
-- **Data:** MongoDB stores roommates, rooms, chores, expenses, events, and chat messages.
+- **Data:** MongoDB stores users, households, chores, expenses, events, and chat messages.
 - **Images:** GitHub Actions builds multi-architecture client and server images and publishes commit-SHA tags to GHCR.
 
 The Kubernetes deployment configuration is maintained separately in the [k3s-platform repository](https://github.com/Taku10/k3s-platform).
@@ -21,18 +21,18 @@ The Kubernetes deployment configuration is maintained separately in the [k3s-pla
 3. REST requests send the token in the `Authorization: Bearer <token>` header.
 4. The API verifies the token and resolves or creates the matching roommate record.
 5. Route handlers read or write MongoDB data.
-6. Chat uses an authenticated Socket.IO connection and joins a room only after membership is checked.
+6. Chat uses an authenticated Socket.IO connection and joins a household channel only after membership is checked.
 
 ## Main data entities
 
 | Entity | Purpose |
 | --- | --- |
 | `Roommate` | Application profile linked to a Firebase UID |
-| `Room` | Household-like group with a creator, members, and join code |
+| `Household` | Group with a creator, members, and invite code |
 | `Chore` | Assigned household task |
 | `Expense` | Shared cost and payment state |
 | `Event` | Calendar item or bill reminder |
-| `ChatMessage` | Message scoped to a room |
+| `ChatMessage` | Message scoped to a household |
 
 ## Delivery flow
 
@@ -45,21 +45,21 @@ Container images are currently tagged with the first seven characters of the sou
 
 ## Security and tenancy status
 
-Firebase authentication is enabled, and real-time chat verifies room membership. However, `v0.1.0` does **not** yet provide complete household isolation:
+Firebase authentication is enabled, and real-time chat verifies household membership. However, `v0.1.0` does **not** yet provide complete household isolation:
 
-- Chores, expenses, events, and roommate queries are not consistently scoped by room.
+- Chores, expenses, events, and member queries are not consistently scoped by household.
 - Some resource lookups do not consistently verify membership.
 - Some update paths accept broader input than a production multi-tenant API should.
 
-For that reason, this version is suitable as an initial preview or a single trusted household deployment. It should not be offered to unrelated households until every household-owned record includes a room identifier and every API operation verifies membership and role permissions.
+For that reason, this version is suitable as an initial preview or a single trusted household deployment. It should not be offered to unrelated households until every household-owned record includes a household identifier and every API operation verifies membership and role permissions.
 
 ## Next architecture milestone
 
 The next milestone should introduce:
 
-1. A required `roomId` on all household-owned records.
+1. A required `householdId` on all household-owned records.
 2. A reusable membership/role authorization middleware.
-3. Room-scoped query indexes such as `{ roomId: 1, createdAt: -1 }`.
+3. Household-scoped query indexes such as `{ householdId: 1, createdAt: -1 }`.
 4. Explicit update allowlists instead of passing request bodies directly to database updates.
 5. Tests proving that a member of household A cannot read or change household B data.
 6. Invitation lifecycle, member removal, and owner/admin roles.

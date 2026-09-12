@@ -3,7 +3,9 @@ const mongoose = require('mongoose');
 
 const expenseSchema = new mongoose.Schema({
 
-  roomId: { type: mongoose.Schema.Types.ObjectId, ref: 'Room', required: false, default: null },
+  householdId: { type: mongoose.Schema.Types.ObjectId, ref: 'Household', required: false, default: null },
+  // Remove after #108 migrates existing expenses.
+  roomId: { type: mongoose.Schema.Types.ObjectId, ref: 'Household' },
   description: { type: String, required: true },
   amount: { type: Number, required: true },
   paidBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Roommate', required: true },

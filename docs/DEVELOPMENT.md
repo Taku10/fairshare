@@ -114,15 +114,15 @@ This mirrors current CI jobs.
 ## Data model (high-level)
 
 - `Roommate` — user profile mapped to Firebase UID
-- `Room` — household container with members and creator
+- `Household` — group with members and a creator
 - `Chore` — task with assignment/completion state
 - `Expense` — shared cost with payer + split participants
 - `Event` — calendar entries and bill metadata
-- `ChatMessage` — room-scoped message feed
+- `ChatMessage` — household-scoped message feed
 
 ## Realtime chat notes
 
 - Socket auth expects Firebase ID token via `socket.handshake.auth.token` unless dev auth bypass is enabled
-- Clients join a room using `joinRoom(roomId)`
-- Messages are sent with `sendMessage({ roomId, text, relatedType, relatedId })`
+- Clients join a household channel using `joinHousehold(householdId)`
+- Messages are sent with `sendMessage({ householdId, text, relatedType, relatedId })`
 - Server broadcasts `chatMessage`
