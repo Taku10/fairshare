@@ -73,9 +73,16 @@ router.put('/:householdId', async (req, res) => {
       return res.status(403).json({ error: 'Not authorized' });
     }
 
-    const updated = await Household.findByIdAndUpdate(req.params.householdId, req.body, {
-      new: true,
-    }).populate('members').populate('createdBy');
+    const updates = {};
+    if (typeof req.body.name === 'string') {
+      updates.name = req.body.name;
+    }
+
+    const updated = await Household.findByIdAndUpdate(
+      req.params.householdId,
+      { $set: updates },
+      { new: true, runValidators: true }
+    ).populate('members').populate('createdBy');
     res.json(updated);
   } catch (err) {
     res.status(400).json({ error: err.message });
