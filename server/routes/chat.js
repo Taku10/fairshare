@@ -17,7 +17,7 @@ async function ensureHouseholdMember(req, res, next) {
   next();
 }
 
-// GET messages for a household
+// GET messages for a household and its associated room
 router.get('/:householdId/chat', ensureHouseholdMember, async (req, res) => {
   try {
     const messages = await ChatMessage.find({
