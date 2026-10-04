@@ -2,7 +2,9 @@
 
 FairShare is a full-stack household coordination app for managing chores, shared expenses, events, members, and chat in one place.
 
-> **Release status:** `v0.1.0` is an initial preview for one trusted household. Household isolation is not yet complete for chores, expenses, events, and roommate data. See the [v0.1.0 release notes](docs/releases/v0.1.0.md).
+> **Release status:** `v0.2.0` establishes Household terminology and structure. It remains a prerelease for one trusted household; complete multi-household isolation is planned for `v0.3.0`. See the [v0.2.0 release notes](docs/releases/v0.2.0.md).
+
+Household documents temporarily remain in MongoDB's `rooms` collection. Existing records may still use the legacy `roomId` field; the data migration has not been run. Do not treat this release as secure for unrelated households.
 
 ## Repository layout
 
@@ -57,7 +59,8 @@ See:
 - [Development guide](docs/DEVELOPMENT.md) for full setup details
 - [API reference](docs/API.md) for endpoint details
 - [Architecture](docs/ARCHITECTURE.md) for application and deployment boundaries
-- [v0.1.0 release notes](docs/releases/v0.1.0.md) for included features and known limitations
+- [v0.2.0 release notes](docs/releases/v0.2.0.md) for included changes and known limitations
+- [v0.1.0 release notes](docs/releases/v0.1.0.md) for the initial preview
 
 Note: local auth bypass (`ALLOW_DEV_AUTH=true`) is only honored when `NODE_ENV` is `development` or `test`.
 

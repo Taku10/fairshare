@@ -1,6 +1,6 @@
 # FairShare architecture
 
-This document describes the application as it exists in the `v0.1.0` preview.
+This document describes the application as it exists in the `v0.2.0` Household Foundation prerelease. Household terminology is in place, but complete multi-household isolation is not.
 
 ## System overview
 
@@ -21,14 +21,14 @@ The Kubernetes deployment configuration is maintained separately in the [k3s-pla
 3. REST requests send the token in the `Authorization: Bearer <token>` header.
 4. The API verifies the token and resolves or creates the matching roommate record.
 5. Route handlers read or write MongoDB data.
-6. Chat uses an authenticated Socket.IO connection and joins a household channel only after membership is checked.
+6. Chat uses an authenticated Socket.IO connection and checks the household's embedded member list before joining its channel. This check does not protect the other resource APIs.
 
 ## Main data entities
 
 | Entity | Purpose |
 | --- | --- |
-| `Roommate` | Application profile linked to a Firebase UID |
-| `Household` | Group with a creator, members, and invite code |
+| `Roommate` | Global user profile linked to a Firebase UID |
+| `Household` | Group with a creator, embedded members, and invite code; documents temporarily remain in MongoDB's `rooms` collection |
 | `Chore` | Assigned household task |
 | `Expense` | Shared cost and payment state |
 | `Event` | Calendar item or bill reminder |
@@ -45,21 +45,23 @@ Container images are currently tagged with the first seven characters of the sou
 
 ## Security and tenancy status
 
-Firebase authentication is enabled, and real-time chat verifies household membership. However, `v0.1.0` does **not** yet provide complete household isolation:
+Firebase authentication is enabled. Chat verifies membership for its REST and Socket.IO operations, but `v0.2.0` does **not** provide complete household isolation:
 
-- Chores, expenses, events, and member queries are not consistently scoped by household.
-- Some resource lookups do not consistently verify membership.
-- Some update paths accept broader input than a production multi-tenant API should.
+- Chore, expense, event, and roommate endpoints are not consistently scoped by household membership.
+- Some resource lookups, updates, and deletes use only a resource ID.
+- `householdId` is optional on some resource models, and a shared default-household behavior remains for some writes.
+- Membership is embedded in `Household.members`; roles and invitation lifecycle management are incomplete.
+- Legacy `roomId` records have not been migrated.
 
-For that reason, this version is suitable as an initial preview or a single trusted household deployment. It should not be offered to unrelated households until every household-owned record includes a household identifier and every API operation verifies membership and role permissions.
+For that reason, this version is suitable only for one trusted household. It should not be offered to unrelated households until every household-owned record has a household identifier and every API operation verifies membership and scopes its database operations.
 
 ## Next architecture milestone
 
-The next milestone should introduce:
+The `v0.3.0` architecture milestone should introduce:
 
-1. A required `householdId` on all household-owned records.
-2. A reusable membership/role authorization middleware.
-3. Household-scoped query indexes such as `{ householdId: 1, createdAt: -1 }`.
-4. Explicit update allowlists instead of passing request bodies directly to database updates.
+1. A required `householdId` on all household-owned records and an explicit migration for legacy data.
+2. A reusable household-membership authorization middleware and membership records.
+3. Household-scoped database operations and query indexes based on actual access patterns.
+4. Explicit update allowlists for all protected resources.
 5. Tests proving that a member of household A cannot read or change household B data.
-6. Invitation lifecycle, member removal, and owner/admin roles.
+6. Secure invitations and household member lifecycle behavior.

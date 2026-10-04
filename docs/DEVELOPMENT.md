@@ -1,6 +1,6 @@
 # Development Guide
 
-This guide covers local setup and development workflow for FairShare.
+This guide covers local setup and development workflow for FairShare `v0.2.0`, the Household Foundation prerelease. It does not describe a secure multi-household release.
 
 ## Architecture overview
 
@@ -112,6 +112,7 @@ npm ci
 This mirrors current CI jobs.
 
 ## Data model (high-level)
+Household-owned records are in transition: legacy `roomId` fields remain in some models, some `householdId` fields are optional, and the data migration has not been run. Chores, expenses, events, and roommate APIs are not consistently scoped to the active household. Do not use this release for unrelated households.
 
 - `Roommate` — user profile mapped to Firebase UID
 - `Household` — group with members and a creator
@@ -121,6 +122,7 @@ This mirrors current CI jobs.
 - `ChatMessage` — household-scoped message feed
 
 ## Realtime chat notes
+The household selector currently exists only in Chat; it is not a global active-household selector. Chat membership checks do not authorize other API routes.
 
 - Socket auth expects Firebase ID token via `socket.handshake.auth.token` unless dev auth bypass is enabled
 - Clients join a household channel using `joinHousehold(householdId)`
