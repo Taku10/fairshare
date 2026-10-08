@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router({ mergeParams: true });
 const Household = require('../models/Household');
+const HouseholdMembership = require('../models/HouseholdMembership');
 
 // Create a household
 router.post('/', async (req, res) => {
@@ -12,6 +13,16 @@ router.post('/', async (req, res) => {
       members: [req.user.roommateId],
       code: Math.random().toString(36).substring(2, 8).toUpperCase(),
     });
+    try {
+      await HouseholdMembership.create({
+        householdId: household._id,
+        userId: req.user.roommateId,
+        role: 'owner',
+      });
+    } catch (err) {
+      await Household.deleteOne({ _id: household._id });
+      throw err;
+    }
     res.status(201).json(household);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -50,9 +61,20 @@ router.post('/join/:code', async (req, res) => {
     const household = await Household.findOne({ code: req.params.code });
     if (!household) return res.status(404).json({ error: 'Household not found' });
 
-    if (!household.members.includes(req.user.roommateId)) {
-      household.members.push(req.user.roommateId);
+    const userId = req.user.roommateId;
+    if (!household.members.some((member) => String(member) === String(userId))) {
+      household.members.push(userId);
       await household.save();
+    }
+
+    try {
+      await HouseholdMembership.updateOne(
+        { householdId: household._id, userId },
+        { $setOnInsert: { role: 'member' } },
+        { upsert: true, runValidators: true, setDefaultsOnInsert: true }
+      );
+    } catch (err) {
+      if (err.code !== 11000) throw err;
     }
 
     await household.populate(['members', 'createdBy']);
