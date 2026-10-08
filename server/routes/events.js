@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Event = require('../models/Event');
+const getOrCreateDefaultHouseholdFor = require('../utils/defaultHousehold');
 
 // Get all events
 router.get('/', async (req, res) => {
@@ -77,8 +78,10 @@ router.get('/bills/unpaid', async (req, res) => {
 // Create a new event
 router.post('/', async (req, res) => {
   try {
+    const householdId = req.body.householdId || (await getOrCreateDefaultHouseholdFor(req.user.roommateId))._id;
     const event = new Event({
       ...req.body,
+      householdId,
       createdBy: req.user.roommateId
     });
     await event.save();

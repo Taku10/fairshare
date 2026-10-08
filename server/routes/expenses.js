@@ -3,21 +3,7 @@ const express = require('express');
 const router = express.Router();
 const Expense = require('../models/Expense');
 const Roommate = require('../models/Roommate');
-const Household = require('../models/Household');
-
-async function getOrCreateDefaultHouseholdFor(roommateId) {
-  let household = await Household.findOne({ name: { $in: ['Default Household', 'Default Room'] } });
-  if (!household) {
-    household = await Household.create({ name: 'Default Household', createdBy: roommateId, members: [roommateId] });
-  } else {
-    const isMember = household.members.some((m) => String(m) === String(roommateId));
-    if (!isMember) {
-      household.members.push(roommateId);
-      await household.save();
-    }
-  }
-  return household;
-}
+const getOrCreateDefaultHouseholdFor = require('../utils/defaultHousehold');
 
 // CREATE expense
 router.post('/', async (req, res) => {
