@@ -2,21 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Chore = require('../models/Chore');
-const Household = require('../models/Household');
-
-async function getOrCreateDefaultHouseholdFor(roommateId) {
-  let household = await Household.findOne({ name: { $in: ['Default Household', 'Default Room'] } });
-  if (!household) {
-    household = await Household.create({ name: 'Default Household', createdBy: roommateId, members: [roommateId] });
-  } else {
-    const isMember = household.members.some((m) => String(m) === String(roommateId));
-    if (!isMember) {
-      household.members.push(roommateId);
-      await household.save();
-    }
-  }
-  return household;
-}
+const getOrCreateDefaultHouseholdFor = require('../utils/defaultHousehold');
 
 //So this is where all all the CRUD operations will go for chores
 
