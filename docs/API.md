@@ -96,7 +96,7 @@ List upcoming events (limited).
 List unpaid bill events.
 
 ### `POST /events`
-Create event (creator is current user). The route does not require or derive a `householdId`.
+Create event (creator is current user). If `householdId` is omitted, the route may assign the shared default household. This fallback does not verify membership or provide household isolation.
 
 ### `PUT /events/:id`
 Update event by ID. The current route accepts unrestricted request fields and does not enforce household membership.
