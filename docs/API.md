@@ -52,6 +52,22 @@ Delete roommate by ID. This endpoint deletes the global roommate record and is n
 
 ## Chores
 
+### Household-scoped routes (preferred)
+
+All require an active household membership. Non-members, and nonexistent households, receive `404`; malformed IDs receive `400`.
+
+- `GET /households/:householdId/chores` — list the household's chores.
+- `GET /households/:householdId/chores/:choreId` — get one chore.
+- `POST /households/:householdId/chores` — create a chore. Accepts `title`, `description`, `dueDate`, `assignedTo`. `householdId` is always set from the route; a body value is ignored.
+- `PUT /households/:householdId/chores/:choreId` — update `title`, `description`, `dueDate`, `assignedTo`, `completed`. `householdId` cannot be changed.
+- `DELETE /households/:householdId/chores/:choreId` — delete a chore.
+
+`assignedTo` must be an active member of the household (or `null` to unassign). Lookups, updates, and deletes always include the household filter.
+
+### Legacy routes (deprecated, insecure)
+
+These remain only until the frontend moves to the scoped routes and are removed after that. They are not household-scoped.
+
 ### `POST /chores`
 Create a chore. The current route accepts request fields directly and may assign a shared default household when `householdId` is absent.
 
