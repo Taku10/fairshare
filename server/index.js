@@ -49,6 +49,15 @@ const writeLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Invite-code guessing protection - 10 join attempts per 15 minutes per IP
+const joinLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: 'Too many join attempts, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Routes
 const householdsRouter = require('./routes/households');
 const choresRouter = require('./routes/chores');
@@ -74,6 +83,7 @@ app.use('/api/households/:householdId/chores', writeLimiter, householdChoresRout
 app.use('/api/households/:householdId/expenses', writeLimiter, householdExpensesRouter);
 app.use('/api/households/:householdId/events', writeLimiter, householdEventsRouter);
 app.use('/api/households/:householdId/messages', writeLimiter, householdMessagesRouter);
+app.use('/api/households/join', joinLimiter);
 app.use('/api/households', writeLimiter, householdsRouter);
 app.use('/api/chores', writeLimiter, choresRouter);
 app.use('/api/expenses', writeLimiter, expensesRouter);
