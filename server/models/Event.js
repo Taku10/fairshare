@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const eventSchema = new mongoose.Schema({
-  householdId: { type: mongoose.Schema.Types.ObjectId, ref: 'Household', required: false, default: null },
+  householdId: { type: mongoose.Schema.Types.ObjectId, ref: 'Household', required: true },
   // Remove after #108 migrates existing events.
   roomId: { type: mongoose.Schema.Types.ObjectId, ref: 'Household' },
   title: { type: String, required: true },
@@ -26,5 +26,7 @@ const eventSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 }, { timestamps: true });
+
+eventSchema.index({ householdId: 1, startDate: 1 });
 
 module.exports = mongoose.model('Event', eventSchema);

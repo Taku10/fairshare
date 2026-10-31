@@ -49,8 +49,10 @@ Firebase authentication is enabled. Chat verifies membership for its REST and So
 
 - Chore, expense, event, and roommate endpoints are not consistently scoped by household membership.
 - Some resource lookups, updates, and deletes use only a resource ID.
-- `householdId` is optional on some resource models, and a shared default-household behavior remains for some writes.
-- Membership is embedded in `Household.members`; roles and invitation lifecycle management are incomplete.
+- New household-owned records require `householdId`, but existing records have not been migrated and may still lack it.
+- A shared default-household behavior remains for some writes.
+- A separate membership model and reusable authorization middleware exist, but the middleware is not yet wired into the household resource routes; embedded `Household.members` is still used by existing flows.
+- Roles and invitation lifecycle management are incomplete.
 - Legacy `roomId` records have not been migrated.
 
 For that reason, this version is suitable only for one trusted household. It should not be offered to unrelated households until every household-owned record has a household identifier and every API operation verifies membership and scopes its database operations.
@@ -59,9 +61,10 @@ For that reason, this version is suitable only for one trusted household. It sho
 
 The `v0.3.0` architecture milestone should introduce:
 
-1. A required `householdId` on all household-owned records and an explicit migration for legacy data.
-2. A reusable household-membership authorization middleware and membership records.
-3. Household-scoped database operations and query indexes based on actual access patterns.
-4. Explicit update allowlists for all protected resources.
-5. Tests proving that a member of household A cannot read or change household B data.
-6. Secure invitations and household member lifecycle behavior.
+1. A documented migration for existing records with missing `householdId` or legacy `roomId`.
+2. Household-scoped creation routes that set `householdId` from authorized request context.
+3. Wire the existing household-membership middleware and membership records into protected routes.
+4. Household-scoped database operations and query indexes based on actual access patterns.
+5. Explicit update allowlists for all protected resources.
+6. Tests proving that a member of household A cannot read or change household B data.
+7. Secure invitations and household member lifecycle behavior.

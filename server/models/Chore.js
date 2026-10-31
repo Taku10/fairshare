@@ -14,4 +14,6 @@ const choreSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+choreSchema.index({ householdId: 1, createdAt: -1 });
+
 module.exports = mongoose.model('Chore', choreSchema);
