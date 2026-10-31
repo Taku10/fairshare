@@ -111,6 +111,10 @@ npm ci
 
 This mirrors current CI jobs.
 
+## Data migration
+
+Existing data needs a one-time migration before the household-scoped routes work for it. See [MIGRATION.md](./MIGRATION.md).
+
 ## Data model (high-level)
 New household-owned records require `householdId`, but existing records have not been migrated and may still lack it or use the legacy `roomId` field. Chores, expenses, events, and roommate APIs are not consistently scoped to the active household. Do not use this release for unrelated households.
 

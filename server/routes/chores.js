@@ -2,7 +2,6 @@
 const express = require('express');
 const router = express.Router();
 const Chore = require('../models/Chore');
-const getOrCreateDefaultHouseholdFor = require('../utils/defaultHousehold');
 
 //So this is where all all the CRUD operations will go for chores
 
@@ -17,8 +16,7 @@ router.post('/', async (req, res) => {
     }
 
     if (!req.body.householdId) {
-      const defaultHousehold = await getOrCreateDefaultHouseholdFor(req.user.roommateId);
-      req.body.householdId = defaultHousehold._id;
+      return res.status(400).json({ error: 'householdId is required' });
     }
 
     const chore = await Chore.create(req.body);

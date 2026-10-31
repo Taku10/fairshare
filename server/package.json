@@ -6,7 +6,8 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "node --test",
-    "seed": "node scripts/seed.js"
+    "seed": "node scripts/seed.js",
+    "migrate:households": "node scripts/migrateHouseholdData.js"
   },
   "type": "commonjs",
   "keywords": [],

@@ -3,7 +3,6 @@ const express = require('express');
 const router = express.Router();
 const Expense = require('../models/Expense');
 const Roommate = require('../models/Roommate');
-const getOrCreateDefaultHouseholdFor = require('../utils/defaultHousehold');
 
 // CREATE expense
 router.post('/', async (req, res) => {
@@ -36,10 +35,7 @@ router.post('/', async (req, res) => {
     req.body.splitBetween = splitBetween;
 
     if (!req.body.householdId) {
-      console.log('   No household reference provided, creating/finding default household...');
-      const defaultHousehold = await getOrCreateDefaultHouseholdFor(req.user.roommateId);
-      console.log('   Default household ID:', defaultHousehold._id);
-      req.body.householdId = defaultHousehold._id;
+      return res.status(400).json({ error: 'householdId is required' });
     }
 
     console.log('   Creating expense with payload:', JSON.stringify(req.body, null, 2));
