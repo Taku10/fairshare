@@ -50,7 +50,7 @@ Firebase authentication is enabled. Chat verifies membership for its REST and So
 - Chore, expense, event, and roommate endpoints are not consistently scoped by household membership.
 - Some resource lookups, updates, and deletes use only a resource ID.
 - New household-owned records require `householdId`, but existing records have not been migrated and may still lack it.
-- A shared default-household behavior remains for some writes.
+- The shared default-household fallback has been removed; legacy create routes now require `householdId`.
 - A separate membership model and reusable authorization middleware exist, but the middleware is not yet wired into the household resource routes; embedded `Household.members` is still used by existing flows.
 - Roles and invitation lifecycle management are incomplete.
 - Legacy `roomId` records have not been migrated.

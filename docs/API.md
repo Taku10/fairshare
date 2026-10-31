@@ -71,7 +71,7 @@ All require an active household membership. Non-members, and nonexistent househo
 These remain only until the frontend moves to the scoped routes and are removed after that. They are not household-scoped.
 
 ### `POST /chores`
-Create a chore. The current route accepts request fields directly and may assign a shared default household when `householdId` is absent.
+Create a chore. The current route accepts request fields directly. `householdId` is required (`400` when absent); the former shared default-household fallback was removed.
 
 ### `GET /chores`
 List all chores; results are not filtered by household membership.
@@ -102,7 +102,7 @@ The payer and everyone in `splitBetween` must be active members of the household
 These remain only until the frontend moves to the scoped routes and are removed after that. They are not household-scoped.
 
 ### `POST /expenses`
-Create expense. Requires valid `description`, positive `amount`, and `paidBy`. If `householdId` is omitted, the current route may assign the shared default household. Referenced users are not validated against household membership.
+Create expense. Requires valid `description`, positive `amount`, and `paidBy`. `householdId` is required (`400` when absent); the former shared default-household fallback was removed. Referenced users are not validated against household membership.
 
 ### `GET /expenses`
 List all expenses; results are not filtered by household membership.
@@ -151,7 +151,7 @@ List upcoming events (limited).
 List unpaid bill events.
 
 ### `POST /events`
-Create event (creator is current user). If `householdId` is omitted, the route may assign the shared default household. This fallback does not verify membership or provide household isolation.
+Create event (creator is current user). `householdId` is required (`400` when absent); the former shared default-household fallback was removed. The route does not verify membership.
 
 ### `PUT /events/:id`
 Update event by ID. The current route accepts unrestricted request fields and does not enforce household membership.
