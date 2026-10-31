@@ -1,17 +1,40 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const router = express.Router({ mergeParams: true });
 const Household = require('../models/Household');
 const HouseholdMembership = require('../models/HouseholdMembership');
+const {
+  requireHouseholdMembership,
+  requireHouseholdRole,
+} = require('../middleware/householdMembership');
+const { newInvite, CODE_PATTERN } = require('../utils/inviteCode');
+
+const PEOPLE_FIELDS = 'displayName email profilePicture';
+const isId = (value) => typeof value === 'string' && /^[a-f\d]{24}$/i.test(value);
+
+// Only owners see the invite code.
+function present(household, role) {
+  const data = household.toObject ? household.toObject() : { ...household };
+  if (role !== 'owner') {
+    delete data.code;
+    delete data.codeExpiresAt;
+  }
+  return data;
+}
 
 // Create a household
 router.post('/', async (req, res) => {
   try {
-    const { name } = req.body;
+    const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
+    if (!name || name.length > 100) {
+      return res.status(400).json({ error: 'A household name up to 100 characters is required' });
+    }
+
     const household = await Household.create({
       name,
       createdBy: req.user.roommateId,
       members: [req.user.roommateId],
-      code: Math.random().toString(36).substring(2, 8).toUpperCase(),
+      ...newInvite(),
     });
     try {
       await HouseholdMembership.create({
@@ -33,40 +56,30 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const households = await Household.find({ members: req.user.roommateId })
-      .populate('members')
-      .populate('createdBy')
+      .populate('members', PEOPLE_FIELDS)
+      .populate('createdBy', PEOPLE_FIELDS)
       .sort({ createdAt: -1 });
-    res.json(households);
+    res.json(
+      households.map((h) =>
+        present(h, String(h.createdBy?._id || h.createdBy) === String(req.user.roommateId) ? 'owner' : 'member')
+      )
+    );
   } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Get a specific household
-router.get('/:householdId', async (req, res) => {
-  try {
-    const household = await Household.findById(req.params.householdId)
-      .populate('members')
-      .populate('createdBy');
-    if (!household) return res.status(404).json({ error: 'Household not found' });
-    res.json(household);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Failed to load households' });
   }
 });
 
 // Join a household by invite code
 router.post('/join/:code', async (req, res) => {
+  const invalid = () => res.status(404).json({ error: 'Invalid or expired invite code' });
   try {
-    const household = await Household.findOne({ code: req.params.code });
-    if (!household) return res.status(404).json({ error: 'Household not found' });
+    const code = String(req.params.code || '').trim().toUpperCase();
+    if (!CODE_PATTERN.test(code)) return invalid();
+
+    const household = await Household.findOne({ code, codeExpiresAt: { $gt: new Date() } });
+    if (!household) return invalid();
 
     const userId = req.user.roommateId;
-    if (!household.members.some((member) => String(member) === String(userId))) {
-      household.members.push(userId);
-      await household.save();
-    }
-
     try {
       await HouseholdMembership.updateOne(
         { householdId: household._id, userId },
@@ -76,56 +89,109 @@ router.post('/join/:code', async (req, res) => {
     } catch (err) {
       if (err.code !== 11000) throw err;
     }
+    await Household.updateOne({ _id: household._id }, { $addToSet: { members: userId } });
 
-    await household.populate(['members', 'createdBy']);
-    res.json(household);
+    const joined = await Household.findById(household._id)
+      .populate('members', PEOPLE_FIELDS)
+      .populate('createdBy', PEOPLE_FIELDS);
+    res.json(present(joined, 'member'));
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(500).json({ error: 'Failed to join household' });
   }
 });
 
-// Update a household
-router.put('/:householdId', async (req, res) => {
+// Get a specific household (members only)
+router.get('/:householdId', requireHouseholdMembership, async (req, res) => {
   try {
-    const household = await Household.findById(req.params.householdId);
-    if (!household) return res.status(404).json({ error: 'Household not found' });
+    const household = await Household.findById(req.household._id)
+      .populate('members', PEOPLE_FIELDS)
+      .populate('createdBy', PEOPLE_FIELDS);
+    res.json(present(household, req.householdMembership.role));
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load household' });
+  }
+});
 
-    // Only creator can update
-    if (String(household.createdBy) !== String(req.user.roommateId)) {
-      return res.status(403).json({ error: 'Not authorized' });
+// Update a household (owner only)
+router.put('/:householdId', requireHouseholdMembership, requireHouseholdRole('owner'), async (req, res) => {
+  try {
+    const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
+    if (!name || name.length > 100) {
+      return res.status(400).json({ error: 'A household name up to 100 characters is required' });
     }
-
-    const updates = {};
-    if (typeof req.body.name === 'string') {
-      updates.name = req.body.name;
-    }
-
-    const updated = await Household.findByIdAndUpdate(
-      req.params.householdId,
-      { $set: updates },
+    const updated = await Household.findOneAndUpdate(
+      { _id: req.household._id },
+      { $set: { name } },
       { new: true, runValidators: true }
-    ).populate('members').populate('createdBy');
-    res.json(updated);
+    )
+      .populate('members', PEOPLE_FIELDS)
+      .populate('createdBy', PEOPLE_FIELDS);
+    res.json(present(updated, 'owner'));
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
 
-// Delete a household
-router.delete('/:householdId', async (req, res) => {
+// Delete a household (owner only). Memberships go with it.
+router.delete('/:householdId', requireHouseholdMembership, requireHouseholdRole('owner'), async (req, res) => {
   try {
-    const household = await Household.findById(req.params.householdId);
-    if (!household) return res.status(404).json({ error: 'Household not found' });
-
-    // Only creator can delete
-    if (String(household.createdBy) !== String(req.user.roommateId)) {
-      return res.status(403).json({ error: 'Not authorized' });
-    }
-
-    await Household.findByIdAndDelete(req.params.householdId);
+    await HouseholdMembership.deleteMany({ householdId: req.household._id });
+    await Household.findOneAndDelete({ _id: req.household._id });
     res.json({ message: 'Household deleted' });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(500).json({ error: 'Failed to delete household' });
+  }
+});
+
+// Replace the invite code with a fresh one (owner only)
+router.post('/:householdId/invite', requireHouseholdMembership, requireHouseholdRole('owner'), async (req, res) => {
+  try {
+    const invite = newInvite();
+    await Household.updateOne({ _id: req.household._id }, { $set: invite });
+    res.json(invite);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to create invite' });
+  }
+});
+
+// Revoke the current invite code (owner only)
+router.delete('/:householdId/invite', requireHouseholdMembership, requireHouseholdRole('owner'), async (req, res) => {
+  try {
+    await Household.updateOne({ _id: req.household._id }, { $set: { codeExpiresAt: new Date() } });
+    res.json({ message: 'Invite revoked' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to revoke invite' });
+  }
+});
+
+// Remove a member (owner) or leave (self). Never deletes the user's account.
+router.delete('/:householdId/members/:userId', requireHouseholdMembership, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!isId(userId) || !mongoose.isValidObjectId(userId)) {
+      return res.status(400).json({ error: 'Invalid user ID' });
+    }
+
+    const isSelf = String(userId) === String(req.user.roommateId);
+    if (!isSelf && req.householdMembership.role !== 'owner') {
+      return res.status(403).json({ error: 'Insufficient household role' });
+    }
+
+    const target = await HouseholdMembership.findOne({
+      householdId: req.household._id,
+      userId,
+      status: 'active',
+    });
+    if (!target) return res.status(404).json({ error: 'Member not found' });
+    if (target.role === 'owner') {
+      return res.status(400).json({ error: 'The owner cannot be removed. Delete the household instead.' });
+    }
+
+    await HouseholdMembership.deleteOne({ householdId: req.household._id, userId });
+    await Household.updateOne({ _id: req.household._id }, { $pull: { members: userId } });
+    res.json({ message: 'Member removed' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to remove member' });
   }
 });
 

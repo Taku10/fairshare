@@ -2,27 +2,29 @@
 const express = require('express');
 const router = express.Router();
 const Roommate = require('../models/Roommate');
+const HouseholdMembership = require('../models/HouseholdMembership');
 
-// CRUD operations for roommates
-
-// Creating a new roommate
-router.post('/', async (req, res) => {
-  try {
-    const roommate = await Roommate.create(req.body);
-    res.status(201).json(roommate);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// Reading all roommates (exclude the current user)
+// Roommates are created at sign-in and edited only through /me.
+// People listing is limited to users who share a household with the caller.
 router.get('/', async (req, res) => {
   try {
-    const roommates = await Roommate.find({ _id: { $ne: req.user.roommateId } })
+    const mine = await HouseholdMembership.find({
+      userId: req.user.roommateId,
+      status: 'active',
+    }).select('householdId');
+    const shared = await HouseholdMembership.find({
+      householdId: { $in: mine.map((m) => m.householdId) },
+      status: 'active',
+    }).select('userId');
+    const ids = [...new Set(shared.map((m) => String(m.userId)))].filter(
+      (userId) => userId !== String(req.user.roommateId)
+    );
+    const roommates = await Roommate.find({ _id: { $in: ids } })
+      .select('displayName email profilePicture bio')
       .sort({ createdAt: -1 });
     res.json(roommates);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Failed to load roommates' });
   }
 });
 
@@ -62,30 +64,6 @@ router.put('/me', async (req, res) => {
       { new: true, runValidators: true }
     );
     res.json(updated);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// Updating a roommate
-router.put('/:id', async (req, res) => {
-  try {
-    const updated = await Roommate.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    res.json(updated);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// Deleting a roommate
-router.delete('/:id', async (req, res) => {
-  try {
-    await Roommate.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Roommate deleted' });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

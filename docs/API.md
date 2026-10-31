@@ -8,47 +8,49 @@ This reference describes the `v0.2.0` Household Foundation prerelease. Authentic
 
 ## Households
 
+Household endpoints other than create, list, and join require an active membership. Non-members and nonexistent households receive `404`; malformed IDs receive `400`.
+
 ### `POST /households`
-Create a household.
+Create a household (`name`, up to 100 characters). The creator becomes the owner and receives an invite `code` that expires after 7 days.
 
 ### `GET /households`
-List households where the current user is a member.
+List households where the current user is a member. Members are returned with `displayName`, `email`, and `profilePicture` only. The invite code is included for owners only.
 
 ### `GET /households/:householdId`
-Get household details. This endpoint currently does not verify that the authenticated user is a member.
+Get household details (members only). The invite `code` and `codeExpiresAt` are visible to owners only.
 
 ### `POST /households/join/:code`
-Join a household by invite code.
-
-Invite codes currently have no expiration or revocation lifecycle. Join attempts do not have a dedicated rate limit.
+Join a household by invite code. Codes are 10 random characters (case-insensitive) and expire after 7 days. Unknown, malformed, expired, and revoked codes all return the same `404`. Limited to 10 attempts per 15 minutes per IP. Legacy codes without an expiry are rejected; an owner must issue a new one.
 
 ### `PUT /households/:householdId`
-Update a household (creator only). Only the `name` field is currently accepted.
+Rename a household (owner only). Only `name` is accepted.
 
 ### `DELETE /households/:householdId`
-Delete a household (creator only).
+Delete a household and its memberships (owner only). Existing chores, expenses, events, and messages are not removed.
+
+### `POST /households/:householdId/invite`
+Replace the invite code with a new one and return `{ code, codeExpiresAt }` (owner only). The old code stops working.
+
+### `DELETE /households/:householdId/invite`
+Revoke the current invite code (owner only).
+
+### `DELETE /households/:householdId/members/:userId`
+Remove a member (owner), or leave the household (`userId` is yourself). The owner cannot be removed. The user's account is never deleted.
 
 Household documents continue to use MongoDB's `rooms` collection.
 
 ## Roommates
 
-### `POST /roommates`
-Create roommate record.
+Roommate records are created at sign-in and edited only through `/roommates/me`. The former `POST /roommates`, `PUT /roommates/:id`, and `DELETE /roommates/:id` routes were removed because they let any user create, modify, or delete any account. Use `DELETE /households/:householdId/members/:userId` to remove someone from a household.
 
 ### `GET /roommates`
-List all roommates excluding current user. This endpoint is not scoped to a household.
+List people who share an active household with the current user (excluding yourself), with `displayName`, `email`, `profilePicture`, and `bio`.
 
 ### `GET /roommates/me`
 Get current user profile.
 
 ### `PUT /roommates/me`
 Update current user profile fields (`displayName`, `bio`, `profilePicture`).
-
-### `PUT /roommates/:id`
-Update roommate by ID. This endpoint currently accepts unrestricted fields and is not limited to the current user's profile.
-
-### `DELETE /roommates/:id`
-Delete roommate by ID. This endpoint deletes the global roommate record and is not a household-membership removal operation.
 
 ## Chores
 
