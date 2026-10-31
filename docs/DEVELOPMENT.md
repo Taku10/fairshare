@@ -112,7 +112,7 @@ npm ci
 This mirrors current CI jobs.
 
 ## Data model (high-level)
-Household-owned records are in transition: legacy `roomId` fields remain in some models, some `householdId` fields are optional, and the data migration has not been run. Chores, expenses, events, and roommate APIs are not consistently scoped to the active household. Do not use this release for unrelated households.
+New household-owned records require `householdId`, but existing records have not been migrated and may still lack it or use the legacy `roomId` field. Chores, expenses, events, and roommate APIs are not consistently scoped to the active household. Do not use this release for unrelated households.
 
 - `Roommate` — user profile mapped to Firebase UID
 - `Household` — group with members and a creator
