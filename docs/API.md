@@ -82,6 +82,23 @@ Delete chore by ID without checking household membership.
 
 ## Expenses
 
+### Household-scoped routes (preferred)
+
+All require an active household membership. Non-members, and nonexistent households, receive `404`; malformed IDs receive `400`.
+
+- `GET /households/:householdId/expenses` — list the household's expenses.
+- `GET /households/:householdId/expenses/:expenseId` — get one expense.
+- `POST /households/:householdId/expenses` — create an expense. Requires `description`, positive `amount`, and `paidBy`; accepts `splitBetween` and `date`. The payer is always included in the split. `householdId` is always set from the route; a body value is ignored.
+- `PUT /households/:householdId/expenses/:expenseId` — update `description`, `amount`, `date`, `paidBy`, `splitBetween`. `householdId` cannot be changed.
+- `DELETE /households/:householdId/expenses/:expenseId` — delete an expense.
+- `GET /households/:householdId/expenses/balances/summary` — the current user's net balance, calculated only from this household's expenses.
+
+The payer and everyone in `splitBetween` must be active members of the household. Lookups, updates, and deletes always include the household filter.
+
+### Legacy routes (deprecated, insecure)
+
+These remain only until the frontend moves to the scoped routes and are removed after that. They are not household-scoped.
+
 ### `POST /expenses`
 Create expense. Requires valid `description`, positive `amount`, and `paidBy`. If `householdId` is omitted, the current route may assign the shared default household. Referenced users are not validated against household membership.
 

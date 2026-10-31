@@ -55,6 +55,7 @@ const householdsRouter = require('./routes/households');
 const choresRouter = require('./routes/chores');
 const householdChoresRouter = require('./routes/householdChores');
 const expensesRouter = require('./routes/expenses');
+const householdExpensesRouter = require('./routes/householdExpenses');
 const roomatesRouter = require('./routes/roommates');
 const chatRouter = require('./routes/chat'); // for history REST
 const eventsRouter = require('./routes/events');
@@ -69,6 +70,7 @@ app.use('/api', authMiddleware);
 
 // Apply stricter rate limiting to write operations
 app.use('/api/households/:householdId/chores', writeLimiter, householdChoresRouter);
+app.use('/api/households/:householdId/expenses', writeLimiter, householdExpensesRouter);
 app.use('/api/households', writeLimiter, householdsRouter);
 app.use('/api/chores', writeLimiter, choresRouter);
 app.use('/api/expenses', writeLimiter, expensesRouter);
