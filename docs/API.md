@@ -116,6 +116,26 @@ Get the current user's net balance calculated from all expenses, not a household
 
 ## Events
 
+### Household-scoped routes (preferred)
+
+All require an active household membership. Non-members and nonexistent households receive `404`; malformed IDs receive `400`.
+
+- `GET /households/:householdId/events` — list events.
+- `GET /households/:householdId/events/range?start=<iso>&end=<iso>` — events in a date range.
+- `GET /households/:householdId/events/upcoming` — upcoming events.
+- `GET /households/:householdId/events/bills/unpaid` — unpaid bills.
+- `GET /households/:householdId/events/:eventId` — one event.
+- `POST /households/:householdId/events` — requires `title` and `startDate`. `householdId` comes from the route and `createdBy` from the session; body values are ignored.
+- `PUT /households/:householdId/events/:eventId` — updates allowed fields only (`title`, `description`, `location`, `eventType`, `startDate`, `endDate`, `allDay`, `billAmount`, `recurring`, `attendees`).
+- `PATCH /households/:householdId/events/:eventId/pay` — mark a bill paid.
+- `DELETE /households/:householdId/events/:eventId` — delete an event.
+
+Attendees must be active household members. People are returned with `displayName` and `profilePicture` only.
+
+### Legacy routes (deprecated, insecure)
+
+Not household-scoped; removed after the frontend migrates.
+
 ### `GET /events`
 List all events; results are not filtered by household membership.
 
@@ -142,20 +162,32 @@ Delete event by ID without checking household membership.
 
 ## Chat (REST history endpoints)
 
+### Household-scoped routes (preferred)
+
+- `GET /households/:householdId/messages` — message history, including legacy `roomId` messages. Senders return `displayName` and `profilePicture` only.
+- `POST /households/:householdId/messages` — send `text` (trimmed, max 2000). Optional `relatedType` (`chore` or `expense`) with `relatedId`, which must belong to the same household. Sender and household are set by the server.
+
+Non-members and nonexistent households receive `404`.
+
+### Legacy routes (deprecated)
+
+Use embedded `Household.members` for the membership check, not `HouseholdMembership`.
+
 ### `GET /chat/:householdId/chat`
-Get household message history (membership required).
+Get household message history.
 
 ### `POST /chat/:householdId/chat`
-Create household message (membership required).
+Create household message.
 
 ## Socket.IO events
 
 After connecting with auth token:
 
-- Client emits `joinHousehold(householdId)`
+- Client emits `joinHousehold(householdId)` — requires an active `HouseholdMembership`.
 - Client emits `sendMessage({ householdId, text, relatedType?, relatedId? })`
 - Server emits `chatMessage` with populated sender
-- Server may emit `errorMessage`
+- Server may emit `errorMessage`. Malformed IDs, missing households, and non-members all get the same `Household not found` message.
+- `text` is trimmed and limited to 2000 characters; `relatedType`/`relatedId` are validated.
 
 ## Rate limits
 
