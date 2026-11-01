@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "./AuthContext";
 import { apiDelete, apiGet, apiPost } from "./api";
 import CalendarSection from "./components/CalendarSection";
@@ -16,7 +16,8 @@ import StatusMessage from "./components/StatusMessage";
 function FairShareApp() {
   const [activeTab, setActiveTab] = useState("chores");
   const [showProfile, setShowProfile] = useState(false);
-  const [showCalendar, setShowCalendar] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef(null);
   const [profile, setProfile] = useState(null);
   const [households, setHouseholds] = useState([]);
   const [activeHouseholdId, setActiveHouseholdId] = useState("");
@@ -27,7 +28,7 @@ function FairShareApp() {
   const [householdAction, setHouseholdAction] = useState("");
   const householdActionLoading = Boolean(householdAction);
   const [inviteMessage, setInviteMessage] = useState("");
-  const { currentUser } = useAuth();
+  const { currentUser, logout } = useAuth();
   const householdStorageKey = `fairshare:active-household:${currentUser?.uid || ""}`;
 
   const loadProfile = useCallback(async () => {
@@ -69,6 +70,22 @@ function FairShareApp() {
     loadHouseholds();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!profileMenuOpen) return undefined;
+    function closeOnOutsideClick(event) {
+      if (!profileMenuRef.current?.contains(event.target)) setProfileMenuOpen(false);
+    }
+    function closeOnEscape(event) {
+      if (event.key === "Escape") setProfileMenuOpen(false);
+    }
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [profileMenuOpen]);
 
   const activeHousehold = useMemo(
     () => households.find((household) => household._id === activeHouseholdId) || null,
@@ -166,101 +183,117 @@ function FairShareApp() {
     loadProfile(); // Refresh profile data when modal closes
   };
 
+  const activePage = {
+    chores: { title: "Chores", description: "Keep household tasks moving." },
+    expenses: { title: "Expenses", description: "Track shared costs and balances." },
+    calendar: { title: "Calendar", description: "See household events and bill reminders." },
+    roommates: { title: "Members", description: "Manage people in this household." },
+    chat: { title: "Chat", description: "Keep in touch with your household." },
+  }[activeTab];
+
+  const navigationItems = [
+    { id: "chores", label: "Chores" },
+    { id: "expenses", label: "Expenses" },
+    { id: "calendar", label: "Calendar" },
+    { id: "roommates", label: "Members" },
+    { id: "chat", label: "Chat" },
+  ];
+
   return (
-    <div className="app-container">
+    <div className="app-container app-shell">
       <header className="app-header">
         <div className="header-content">
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '1rem'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: '1 1 200px' }}>
-              <PageHeader title="FairShare" description="Your household, perfectly balanced" />
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '0 0 auto', position: 'relative' }}>
-              <button
-                onClick={() => setShowCalendar(true)}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  borderRadius: '12px',
-                  padding: '0.6rem',
-                  color: 'white',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '1.3rem',
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-                title="Calendar"
-              >
-                📅
-              </button>
-              <button
-                onClick={() => setShowProfile(!showProfile)}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  borderRadius: '999px',
-                  padding: '0.5rem 1rem',
-                  color: 'white',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  fontSize: '0.95rem',
-                  fontWeight: 600,
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                <span style={{ fontSize: '1.2rem' }}>👤</span>
-                {profile?.displayName || currentUser?.displayName || currentUser?.email?.split("@")[0] || currentUser?.email}
-                <span style={{ fontSize: '0.7rem' }}>{showProfile ? '▲' : '▼'}</span>
-              </button>
+          <div className="app-header__inner">
+            <PageHeader title="FairShare" description="Your household, perfectly balanced" />
+            <div className="header-controls">
+              <div className="header-household">
+                <label htmlFor="active-household">Household</label>
+                <select
+                  id="active-household"
+                  className="form-select"
+                  value={activeHouseholdId}
+                  onChange={(event) => selectHousehold(event.target.value)}
+                  disabled={householdsLoading || households.length === 0}
+                >
+                  {households.length === 0 && <option value="">No households</option>}
+                  {households.map((household) => (
+                    <option key={household._id} value={household._id}>{household.name}</option>
+                  ))}
+                </select>
+                <Button
+                  variant="logout"
+                  aria-label="Refresh households"
+                  title="Refresh households"
+                  onClick={() => loadHouseholds()}
+                  disabled={householdsLoading}
+                >
+                  Refresh
+                </Button>
+              </div>
+              <div className="profile-menu" ref={profileMenuRef}>
+                <button
+                  type="button"
+                  className="profile-menu__trigger"
+                  aria-expanded={profileMenuOpen}
+                  aria-controls="profile-menu-panel"
+                  onClick={() => setProfileMenuOpen((open) => !open)}
+                >
+                  <span className="profile-menu__avatar" aria-hidden="true">
+                    {(profile?.displayName || currentUser?.displayName || currentUser?.email || "U").slice(0, 1).toUpperCase()}
+                  </span>
+                  <span className="profile-menu__name">
+                    {profile?.displayName || currentUser?.displayName || currentUser?.email?.split("@")[0]}
+                  </span>
+                  <span aria-hidden="true">⌄</span>
+                </button>
+                <div id="profile-menu-panel" className="profile-menu__panel" hidden={!profileMenuOpen}>
+                    <div className="profile-menu__identity">
+                      <strong>{profile?.displayName || currentUser?.displayName || "Your account"}</strong>
+                      <span>{currentUser?.email}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setProfileMenuOpen(false);
+                        setShowProfile(true);
+                      }}
+                    >
+                      Edit profile
+                    </button>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setProfileMenuOpen(false);
+                        await logout();
+                      }}
+                    >
+                      Sign out
+                    </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
-      <Card as="section" className="section" aria-label="Active household" style={{ margin: "1rem auto", maxWidth: 1200 }}>
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.75rem" }}>
-          <label htmlFor="active-household" style={{ fontWeight: 600 }}>Active household</label>
-          <select
-            id="active-household"
-            className="form-select"
-            value={activeHouseholdId}
-            onChange={(event) => selectHousehold(event.target.value)}
-            disabled={householdsLoading || households.length === 0}
-          >
-            {households.length === 0 && <option value="">No households</option>}
-            {households.map((household) => (
-              <option key={household._id} value={household._id}>{household.name}</option>
+      <div className="app-shell__body">
+        <aside className="app-sidebar" aria-label="Application navigation">
+          <nav className="tab-navigation" aria-label="Main navigation">
+            {navigationItems.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setActiveTab(item.id)}
+                className={`tab-button ${activeTab === item.id ? "active" : ""}`}
+                aria-current={activeTab === item.id ? "page" : undefined}
+              >
+                {item.label}
+              </button>
             ))}
-          </select>
-          <Button variant="secondary" onClick={() => loadHouseholds()} disabled={householdsLoading}>
-            Refresh
-          </Button>
-        </div>
+          </nav>
+        </aside>
+        <div className="app-shell__main">
+      <Card as="section" className="household-actions" aria-label="Household actions">
         {householdError && <StatusMessage variant="error">{householdError}</StatusMessage>}
         {!householdsLoading && households.length === 0 && (
           <EmptyState
@@ -388,34 +421,8 @@ function FairShareApp() {
         </div>
       )}
 
-      <div className="tab-navigation">
-        <button
-          onClick={() => setActiveTab("chores")}
-          className={`tab-button ${activeTab === "chores" ? "active" : ""}`}
-        >
-          Chores
-        </button>
-        <button
-          onClick={() => setActiveTab("expenses")}
-          className={`tab-button ${activeTab === "expenses" ? "active" : ""}`}
-        >
-          Expenses
-        </button>
-        <button
-          onClick={() => setActiveTab("roommates")}
-          className={`tab-button ${activeTab === "roommates" ? "active" : ""}`}
-        >
-          Roommates
-        </button>
-        <button
-          onClick={() => setActiveTab("chat")}
-          className={`tab-button ${activeTab === "chat" ? "active" : ""}`}
-        >
-          Chat
-        </button>
-      </div>
-
       <main className="content">
+        <PageHeader title={activePage.title} description={activePage.description} />
         {householdsLoading && <div className="loading">Loading households...</div>}
         {!householdsLoading && !activeHousehold && (
           <div className="empty-state">
@@ -458,35 +465,17 @@ function FairShareApp() {
             onHouseholdAccessError={handleHouseholdAccessError}
           />
         )}
+        {activeHousehold && activeTab === "calendar" && (
+          <CalendarSection
+            key={`calendar-${activeHouseholdId}`}
+            householdId={activeHouseholdId}
+            roommates={activeHousehold.members || []}
+            onHouseholdAccessError={handleHouseholdAccessError}
+          />
+        )}
       </main>
-
-      {/* Calendar Modal */}
-      {showCalendar && (
-        <div 
-          className="calendar-modal-overlay"
-          onClick={() => setShowCalendar(false)}
-        >
-          <div 
-            className="calendar-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setShowCalendar(false)}
-              className="calendar-modal-close"
-            >
-              ×
-            </button>
-            {activeHousehold && (
-              <CalendarSection
-                key={`calendar-${activeHouseholdId}`}
-                householdId={activeHouseholdId}
-                roommates={activeHousehold.members || []}
-                onHouseholdAccessError={handleHouseholdAccessError}
-              />
-            )}
-          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

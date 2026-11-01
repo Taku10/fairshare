@@ -37,8 +37,8 @@
 
 .list-item.completed {
   opacity: 0.7;
-  background: rgba(34, 197, 94, 0.05);
-  border-color: rgba(34, 197, 94, 0.3);
+  background: rgba(98, 104, 143, 0.05);
+  border-color: rgba(98, 104, 143, 0.24);
   backdrop-filter: blur(20px);
 }
 
