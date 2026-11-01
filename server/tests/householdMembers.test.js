@@ -162,6 +162,14 @@ test('the invite code is visible to owners only', async (t) => {
   assert.equal(list.body[0].code, undefined);
 });
 
+test('household list uses active memberships, not stale embedded member IDs', async (t) => {
+  const { call, households } = await setup(t);
+  households[0].members.push(outsider);
+
+  assert.deepEqual((await call('GET', '/api/households', outsider)).body, []);
+  assert.deepEqual((await call('GET', '/api/households', member)).body.map((h) => h._id), [String(hhA)]);
+});
+
 test('only the owner can update, delete, rotate, or revoke', async (t) => {
   const { call, households } = await setup(t);
   for (const [method, path, body] of [

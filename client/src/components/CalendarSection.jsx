@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from "../api";
 import ConfirmDialog from "./ConfirmDialog";
 
-function CalendarSection() {
+function CalendarSection({ householdId, roommates, onHouseholdAccessError }) {
     const [events, setEvents] = useState([]);
-    const [roommates, setRoommates] = useState([]);
     const [viewMode, setViewMode] = useState("calendar"); // calendar, upcoming, list
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(null);
@@ -28,45 +27,24 @@ function CalendarSection() {
     const [confirmDelete, setConfirmDelete] = useState(null);
     const [filterType, setFilterType] = useState("all");
 
-    useEffect(() => {
-        let isMounted = true;
-        
-        async function loadInitialData() {
-            try {
-                const [eventsRes, roommatesRes] = await Promise.all([
-                    apiGet("/events"),
-                    apiGet("/roommates")
-                ]);
-                if (isMounted) {
-                    setEvents(Array.isArray(eventsRes.data) ? eventsRes.data : []);
-                    setRoommates(Array.isArray(roommatesRes.data) ? roommatesRes.data : []);
-                    setError("");
-                }
-            } catch (err) {
-                console.error(err);
-                if (isMounted) {
-                    setError("Failed to load events");
-                }
-            }
-        }
-        
-        loadInitialData();
-        
-        return () => {
-            isMounted = false;
-        };
-    }, []);
-
-    async function fetchEvents() {
+    const fetchEvents = useCallback(async () => {
         try {
-            const res = await apiGet("/events");
+            const res = await apiGet(`/households/${householdId}/events`);
             setEvents(Array.isArray(res.data) ? res.data : []);
             setError("");
         } catch (err) {
             console.error(err);
             setError("Failed to load events");
+            if (err.response?.status === 404) onHouseholdAccessError?.();
         }
-    }
+    }, [householdId, onHouseholdAccessError]);
+
+    useEffect(() => {
+        async function loadEvents() {
+            await fetchEvents();
+        }
+        loadEvents();
+    }, [fetchEvents]);
 
     function resetForm() {
         setTitle("");
@@ -117,9 +95,9 @@ function CalendarSection() {
 
         try {
             if (editingEventId) {
-                await apiPut(`/events/${editingEventId}`, eventData);
+                await apiPut(`/households/${householdId}/events/${editingEventId}`, eventData);
             } else {
-                await apiPost("/events", eventData);
+                await apiPost(`/households/${householdId}/events`, eventData);
             }
             await fetchEvents();
             resetForm();
@@ -127,6 +105,7 @@ function CalendarSection() {
         } catch (err) {
             console.error(err);
             setError(err.response?.data?.error || "Failed to save event");
+            if (err.response?.status === 404) onHouseholdAccessError?.();
         }
     }
 
@@ -155,23 +134,25 @@ function CalendarSection() {
 
     async function handleDelete(id) {
         try {
-            await apiDelete(`/events/${id}`);
+            await apiDelete(`/households/${householdId}/events/${id}`);
             await fetchEvents();
             setConfirmDelete(null);
             setSelectedDate(null);
         } catch (err) {
             console.error(err);
             setError("Failed to delete event");
+            if (err.response?.status === 404) onHouseholdAccessError?.();
         }
     }
 
     async function handleMarkPaid(id) {
         try {
-            await apiPatch(`/events/${id}/pay`);
+            await apiPatch(`/households/${householdId}/events/${id}/pay`);
             await fetchEvents();
         } catch (err) {
             console.error(err);
             setError("Failed to mark bill as paid");
+            if (err.response?.status === 404) onHouseholdAccessError?.();
         }
     }
 
@@ -608,12 +589,12 @@ function CalendarSection() {
                                         onClick={() => toggleAttendee(rm._id)}
                                         className={attendees.includes(rm._id) ? "chip chip-selected" : "chip"}
                                         style={{
-                                            backgroundColor: attendees.includes(rm._id) ? rm.color : 'transparent',
-                                            borderColor: rm.color,
-                                            color: attendees.includes(rm._id) ? '#fff' : rm.color
+                                            backgroundColor: attendees.includes(rm._id) ? "var(--primary)" : "transparent",
+                                            borderColor: "var(--primary)",
+                                            color: attendees.includes(rm._id) ? "#fff" : "var(--primary)"
                                         }}
                                     >
-                                        {rm.name}
+                                        {rm.displayName || rm.email?.split("@")[0] || "Roommate"}
                                     </button>
                                 ))}
                             </div>
@@ -790,8 +771,8 @@ function CalendarSection() {
                                                 <strong>👥 Attendees:</strong>{' '}
                                                 {event.attendees.map((a, idx) => (
                                                     <span key={a._id}>
-                                                        <span style={{ color: a.color, fontWeight: 'bold' }}>
-                                                            {a.name}
+                                                        <span style={{ fontWeight: 'bold' }}>
+                                                            {a.displayName || a.email?.split("@")[0] || "Roommate"}
                                                         </span>
                                                         {idx < event.attendees.length - 1 ? ', ' : ''}
                                                     </span>
@@ -800,7 +781,7 @@ function CalendarSection() {
                                         )}
                                         
                                         <p className="text-muted" style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>
-                                            Created by {event.createdBy?.name || 'Unknown'}
+                                            Created by {event.createdBy?.displayName || 'Unknown'}
                                         </p>
                                     </div>
                                 </div>

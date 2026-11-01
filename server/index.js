@@ -60,13 +60,9 @@ const joinLimiter = rateLimit({
 
 // Routes
 const householdsRouter = require('./routes/households');
-const choresRouter = require('./routes/chores');
 const householdChoresRouter = require('./routes/householdChores');
-const expensesRouter = require('./routes/expenses');
 const householdExpensesRouter = require('./routes/householdExpenses');
 const roomatesRouter = require('./routes/roommates');
-const chatRouter = require('./routes/chat'); // for history REST
-const eventsRouter = require('./routes/events');
 const householdEventsRouter = require('./routes/householdEvents');
 const householdMessagesRouter = require('./routes/householdMessages');
 
@@ -85,11 +81,7 @@ app.use('/api/households/:householdId/events', writeLimiter, householdEventsRout
 app.use('/api/households/:householdId/messages', writeLimiter, householdMessagesRouter);
 app.use('/api/households/join', joinLimiter);
 app.use('/api/households', writeLimiter, householdsRouter);
-app.use('/api/chores', writeLimiter, choresRouter);
-app.use('/api/expenses', writeLimiter, expensesRouter);
 app.use('/api/roommates', writeLimiter, roomatesRouter);
-app.use('/api/chat', writeLimiter, chatRouter);
-app.use('/api/events', writeLimiter, eventsRouter);
 
 // --- HTTP server + socket.io ---
 const server = http.createServer(app);

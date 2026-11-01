@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { apiDelete, apiGet, apiPost, apiPut } from "../api";
 import ConfirmDialog from "./ConfirmDialog";
 
-function ChoresSection() {
+function ChoresSection({ householdId, roommates, onHouseholdAccessError }) {
     const [chores, setChores] = useState([]);
-    const [roommates, setRoommates] = useState([]);
     const [title, setTitle] = useState("");
     const [assignedTo, setAssignedTo] = useState("");
     const [loading, setLoading] = useState(false);
@@ -17,33 +16,24 @@ function ChoresSection() {
     const itemsPerPage = 5;
     const [confirmDelete, setConfirmDelete] = useState(null);
 
-    useEffect(() => {
-        fetchChores();
-        fetchRoommates();
-    }, []);
-
-    async function fetchRoommates() {
-        try {
-            const res = await apiGet("/roommates");
-            setRoommates(Array.isArray(res.data) ? res.data : []);
-        } catch (err) {
-            console.error(err);
-        }
-    }
-
-    async function fetchChores() {
+    const fetchChores = useCallback(async () => {
         try {
             setLoading(true);
-            const res = await apiGet("/chores");
+            const res = await apiGet(`/households/${householdId}/chores`);
             setChores(Array.isArray(res.data) ? res.data : []);
             setError("");
         } catch (err) {
             console.error(err);
             setError("Failed to load chores");
+            if (err.response?.status === 404) onHouseholdAccessError?.();
         } finally {
             setLoading(false);
         }
-    }
+    }, [householdId, onHouseholdAccessError]);
+
+    useEffect(() => {
+        fetchChores();
+    }, [fetchChores]);
 
     async function handleAddChore(e) {
         e.preventDefault();
@@ -64,10 +54,10 @@ function ChoresSection() {
             const payload = { title: title.trim(), assignedTo: assignedTo || undefined };
             let res;
             if (editingChoreId) {
-                res = await apiPut(`/chores/${editingChoreId}`, payload);
+                res = await apiPut(`/households/${householdId}/chores/${editingChoreId}`, payload);
                 setChores((prev) => prev.map((c) => (c._id === editingChoreId ? res.data : c)));
             } else {
-                res = await apiPost("/chores", payload);
+                res = await apiPost(`/households/${householdId}/chores`, payload);
                 setChores((prev) => [res.data, ...prev]);
             }
 
@@ -91,7 +81,7 @@ function ChoresSection() {
 
         try {
             setError("");
-            await apiDelete(`/chores/${id}`);
+            await apiDelete(`/households/${householdId}/chores/${id}`);
             setChores((prev) => prev.filter((c) => c._id !== id));
         } catch (err) {
             console.error(err);
@@ -101,7 +91,7 @@ function ChoresSection() {
 
     async function toggleComplete(chore) {
         try {
-            const res = await apiPut(`/chores/${chore._id}`, { ...chore, completed: !chore.completed });
+            const res = await apiPut(`/households/${householdId}/chores/${chore._id}`, { completed: !chore.completed });
             setChores((prev) => prev.map((c) => (c._id === chore._id ? res.data : c)));
         } catch (err) {
             console.error(err);

@@ -1,28 +1,23 @@
-import { useEffect, useState } from "react";
-import { apiDelete, apiGet } from "../api";
+import { useState } from "react";
+import { apiDelete } from "../api";
 import ConfirmDialog from "./ConfirmDialog";
 
-function RoommatesSection() {
-  const [roommates, setRoommates] = useState([]);
+function RoommatesSection({
+  householdId,
+  roommates,
+  currentUserId,
+  isOwner,
+  onHouseholdAccessError,
+  onMembersChanged,
+}) {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [confirmDelete, setConfirmDelete] = useState(null);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await apiGet("/roommates");
-        setRoommates(Array.isArray(res.data) ? res.data : []);
-        setError("");
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load roommates");
-      }
-    };
-    load();
-  }, []);
+  const visibleRoommates = (roommates || []).filter(
+    (roommate) => !isOwner || String(roommate._id) !== String(currentUserId)
+  );
 
   async function handleDeleteRoommate(id) {
     setConfirmDelete(id);
@@ -34,11 +29,12 @@ function RoommatesSection() {
 
     try {
       setError("");
-      await apiDelete(`/roommates/${id}`);
-      setRoommates((prev) => prev.filter((r) => r._id !== id));
+      await apiDelete(`/households/${householdId}/members/${id}`);
+      await onMembersChanged?.();
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || "Failed to remove roommate. Please try again.");
+      setError(err.response?.data?.error || "Failed to update household membership. Please try again.");
+      if (err.response?.status === 404) onHouseholdAccessError?.();
     }
   }
 
@@ -46,14 +42,16 @@ function RoommatesSection() {
     <div className="section">
       <ConfirmDialog
         isOpen={confirmDelete !== null}
-        title="Remove Roommate"
-        message="Are you sure you want to remove this roommate? This action cannot be undone."
+        title={String(confirmDelete) === String(currentUserId) ? "Leave Household" : "Remove Member"}
+        message={String(confirmDelete) === String(currentUserId)
+          ? "Are you sure you want to leave this household?"
+          : "Are you sure you want to remove this member from the household?"}
         onConfirm={confirmDeleteRoommate}
         onCancel={() => setConfirmDelete(null)}
       />
       <h2>Roommates</h2>
       <p style={{ color: "var(--text-light)", marginBottom: "1.5rem" }}>
-        Roommates are automatically added when they sign in.
+        Members are listed only for the active household.
       </p>
 
       {error && <div className="message message-error">{error}</div>}
@@ -82,15 +80,15 @@ function RoommatesSection() {
         )}
       </div>
 
-      {roommates.length === 0 ? (
+      {visibleRoommates.length === 0 ? (
         <div className="empty-state">
-          <p className="empty-state-text">No roommates yet. Add your first roommate!</p>
+          <p className="empty-state-text">No other members in this household yet.</p>
         </div>
       ) : (
         <>
           <ul className="list">
             {(() => {
-              const filtered = roommates.filter((rm) => {
+              const filtered = visibleRoommates.filter((rm) => {
                 const q = search.trim().toLowerCase();
                 if (!q) return true;
                 const name = (rm.displayName || "").toLowerCase();
@@ -139,18 +137,27 @@ function RoommatesSection() {
                       </div>
                       <div className="list-item-title" style={{ fontWeight: 600 }}>{name}</div>
                     </div>
-                    <div className="list-item-actions">
-                      <button onClick={() => handleDeleteRoommate(rm._id)} className="btn btn-danger">
-                        Remove
-                      </button>
-                    </div>
+                    {isOwner && String(rm._id) !== String(currentUserId) && (
+                      <div className="list-item-actions">
+                        <button onClick={() => handleDeleteRoommate(rm._id)} className="btn btn-danger">
+                          Remove
+                        </button>
+                      </div>
+                    )}
+                    {!isOwner && String(rm._id) === String(currentUserId) && (
+                      <div className="list-item-actions">
+                        <button onClick={() => handleDeleteRoommate(rm._id)} className="btn btn-secondary">
+                          Leave household
+                        </button>
+                      </div>
+                    )}
                   </li>
                 );
               });
             })()}
           </ul>
           {(() => {
-            const filtered = roommates.filter((rm) => {
+            const filtered = visibleRoommates.filter((rm) => {
               const q = search.trim().toLowerCase();
               if (!q) return true;
               const name = (rm.displayName || "").toLowerCase();

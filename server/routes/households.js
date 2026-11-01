@@ -55,15 +55,20 @@ router.post('/', async (req, res) => {
 // Get all households for the current user
 router.get('/', async (req, res) => {
   try {
-    const households = await Household.find({ members: req.user.roommateId })
+    const memberships = await HouseholdMembership.find({
+      userId: req.user.roommateId,
+      status: 'active',
+    }).select('householdId role');
+    const roleByHousehold = new Map(
+      memberships.map((membership) => [String(membership.householdId), membership.role])
+    );
+    const households = await Household.find({
+      _id: { $in: memberships.map((membership) => membership.householdId) },
+    })
       .populate('members', PEOPLE_FIELDS)
       .populate('createdBy', PEOPLE_FIELDS)
       .sort({ createdAt: -1 });
-    res.json(
-      households.map((h) =>
-        present(h, String(h.createdBy?._id || h.createdBy) === String(req.user.roommateId) ? 'owner' : 'member')
-      )
-    );
+    res.json(households.map((household) => present(household, roleByHousehold.get(String(household._id)))));
   } catch (err) {
     res.status(500).json({ error: 'Failed to load households' });
   }

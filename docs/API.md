@@ -4,7 +4,7 @@ Base URL (local default): `http://localhost:5000/api`
 
 All API endpoints require `Authorization: Bearer <firebase-id-token>` unless server dev auth bypass is enabled.
 
-This reference describes the `v0.2.0` Household Foundation prerelease. Authentication alone does not provide household authorization: most chore, expense, event, and roommate endpoints below are not consistently scoped to a household. Use this version only for one trusted household. Household-scoped resource routes and complete membership checks are planned for `v0.3.0`.
+Household-owned resource routes require active membership. Non-members and nonexistent households receive `404`; malformed household IDs receive `400`. Clients must use the active household's scoped routes.
 
 ## Households
 
@@ -14,7 +14,7 @@ Household endpoints other than create, list, and join require an active membersh
 Create a household (`name`, up to 100 characters). The creator becomes the owner and receives an invite `code` that expires after 7 days.
 
 ### `GET /households`
-List households where the current user is a member. Members are returned with `displayName`, `email`, and `profilePicture` only. The invite code is included for owners only.
+List households where the current user has an active membership. Members are returned with `displayName`, `email`, and `profilePicture` only. The invite code is included for owners only.
 
 ### `GET /households/:householdId`
 Get household details (members only). The invite `code` and `codeExpiresAt` are visible to owners only.
@@ -66,21 +66,9 @@ All require an active household membership. Non-members, and nonexistent househo
 
 `assignedTo` must be an active member of the household (or `null` to unassign). Lookups, updates, and deletes always include the household filter.
 
-### Legacy routes (deprecated, insecure)
+### Legacy routes removed
 
-These remain only until the frontend moves to the scoped routes and are removed after that. They are not household-scoped.
-
-### `POST /chores`
-Create a chore. The current route accepts request fields directly. `householdId` is required (`400` when absent); the former shared default-household fallback was removed.
-
-### `GET /chores`
-List all chores; results are not filtered by household membership.
-
-### `PUT /chores/:id`
-Update chore fields (`title`, `assignedTo`, `completed`, and `householdId`) by chore ID. The lookup does not enforce household membership.
-
-### `DELETE /chores/:id`
-Delete chore by ID without checking household membership.
+The unscoped `/chores` endpoints are no longer mounted. Use the household-scoped routes above.
 
 ## Expenses
 
@@ -97,24 +85,9 @@ All require an active household membership. Non-members, and nonexistent househo
 
 The payer and everyone in `splitBetween` must be active members of the household. Lookups, updates, and deletes always include the household filter.
 
-### Legacy routes (deprecated, insecure)
+### Legacy routes removed
 
-These remain only until the frontend moves to the scoped routes and are removed after that. They are not household-scoped.
-
-### `POST /expenses`
-Create expense. Requires valid `description`, positive `amount`, and `paidBy`. `householdId` is required (`400` when absent); the former shared default-household fallback was removed. Referenced users are not validated against household membership.
-
-### `GET /expenses`
-List all expenses; results are not filtered by household membership.
-
-### `PUT /expenses/:id`
-Update expense fields (`description`, `amount`, `paidBy`, `splitBetween`) by expense ID. The lookup does not enforce household membership or validate referenced users against the same household.
-
-### `DELETE /expenses/:id`
-Delete expense by ID without checking household membership.
-
-### `GET /expenses/balances/summary`
-Get the current user's net balance calculated from all expenses, not a household-specific summary.
+The unscoped `/expenses` endpoints are no longer mounted. Use the household-scoped routes above.
 
 ## Events
 
@@ -134,33 +107,9 @@ All require an active household membership. Non-members and nonexistent househol
 
 Attendees must be active household members. People are returned with `displayName` and `profilePicture` only.
 
-### Legacy routes (deprecated, insecure)
+### Legacy routes removed
 
-Not household-scoped; removed after the frontend migrates.
-
-### `GET /events`
-List all events; results are not filtered by household membership.
-
-### `GET /events/range?start=<iso>&end=<iso>`
-List events in date range.
-
-### `GET /events/upcoming`
-List upcoming events (limited).
-
-### `GET /events/bills/unpaid`
-List unpaid bill events.
-
-### `POST /events`
-Create event (creator is current user). `householdId` is required (`400` when absent); the former shared default-household fallback was removed. The route does not verify membership.
-
-### `PUT /events/:id`
-Update event by ID. The current route accepts unrestricted request fields and does not enforce household membership.
-
-### `PATCH /events/:id/pay`
-Mark bill event as paid by ID without checking household membership.
-
-### `DELETE /events/:id`
-Delete event by ID without checking household membership.
+The unscoped `/events` endpoints are no longer mounted. Use the household-scoped routes above.
 
 ## Chat (REST history endpoints)
 
@@ -171,15 +120,9 @@ Delete event by ID without checking household membership.
 
 Non-members and nonexistent households receive `404`.
 
-### Legacy routes (deprecated)
+### Legacy routes removed
 
-Use embedded `Household.members` for the membership check, not `HouseholdMembership`.
-
-### `GET /chat/:householdId/chat`
-Get household message history.
-
-### `POST /chat/:householdId/chat`
-Create household message.
+The unscoped `/chat` endpoints are no longer mounted. Use the household-scoped routes above.
 
 ## Socket.IO events
 
