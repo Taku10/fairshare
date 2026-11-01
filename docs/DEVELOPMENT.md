@@ -116,7 +116,7 @@ This mirrors current CI jobs.
 Existing data needs a one-time migration before the household-scoped routes work for it. See [MIGRATION.md](./MIGRATION.md).
 
 ## Data model (high-level)
-New household-owned records require `householdId`, but existing records have not been migrated and may still lack it or use the legacy `roomId` field. Chores, expenses, events, and roommate APIs are not consistently scoped to the active household. Do not use this release for unrelated households.
+New household-owned records require `householdId`. Existing records need the one-time migration described in [MIGRATION.md](./MIGRATION.md) before scoped routes can access them.
 
 - `Roommate` — user profile mapped to Firebase UID
 - `Household` — group with members and a creator
@@ -125,8 +125,8 @@ New household-owned records require `householdId`, but existing records have not
 - `Event` — calendar entries and bill metadata
 - `ChatMessage` — household-scoped message feed
 
-## Realtime chat notes
-The household selector currently exists only in Chat; it is not a global active-household selector. Chat membership checks do not authorize other API routes.
+## Active household and realtime chat
+The client has a global active-household selector. Switching households remounts household-owned sections so their prior data and form state are cleared. The selected ID is not an authorization credential; each API route independently checks membership.
 
 - Socket auth expects Firebase ID token via `socket.handshake.auth.token` unless dev auth bypass is enabled
 - Clients join a household channel using `joinHousehold(householdId)`

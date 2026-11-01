@@ -14,9 +14,16 @@ const DEFAULT_SOCKET_URL =
     : window.location.origin;
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || DEFAULT_SOCKET_URL;
 
-function HouseholdChat({ householdId, currentUser, initialMessages = [], household }) {
+function HouseholdChat({
+  householdId,
+  currentUser,
+  initialMessages = [],
+  household,
+  onHouseholdAccessError,
+}) {
   const [messages, setMessages] = useState(initialMessages);
   const [text, setText] = useState("");
+  const [socketError, setSocketError] = useState("");
   const socketRef = useRef(null);
   const bottomRef = useRef(null);
 
@@ -52,6 +59,11 @@ function HouseholdChat({ householdId, currentUser, initialMessages = [], househo
 
       socket.on("errorMessage", (msg) => {
         console.error("Socket error:", msg);
+        setSocketError(msg);
+        if (msg === "Household not found") {
+          socket.disconnect();
+          onHouseholdAccessError?.();
+        }
       });
     };
 
@@ -64,7 +76,7 @@ function HouseholdChat({ householdId, currentUser, initialMessages = [], househo
         socketRef.current.disconnect();
       }
     };
-  }, [householdId, currentUser]);
+  }, [householdId, currentUser, onHouseholdAccessError]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -96,6 +108,13 @@ function HouseholdChat({ householdId, currentUser, initialMessages = [], househo
       height: 480,
       overflow: 'hidden'
     }}>
+      {socketError && (
+        <div className="message message-error" role="alert" style={{ margin: "0.75rem" }}>
+          {socketError === "Household not found"
+            ? "You no longer have access to this household."
+            : socketError}
+        </div>
+      )}
       <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid #e2e8f0', background: '#fff' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>

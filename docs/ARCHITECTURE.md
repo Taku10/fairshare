@@ -1,6 +1,6 @@
 # FairShare architecture
 
-This document describes the application as it exists in the `v0.2.0` Household Foundation prerelease. Household terminology is in place, but complete multi-household isolation is not.
+This document describes the household-isolation architecture introduced during `v0.3.0`. Existing production data still requires the documented migration.
 
 ## System overview
 
@@ -21,7 +21,8 @@ The Kubernetes deployment configuration is maintained separately in the [k3s-pla
 3. REST requests send the token in the `Authorization: Bearer <token>` header.
 4. The API verifies the token and resolves or creates the matching roommate record.
 5. Route handlers read or write MongoDB data.
-6. Chat uses an authenticated Socket.IO connection and checks the household's embedded member list before joining its channel. This check does not protect the other resource APIs.
+6. Household resource routes and Socket.IO verify active membership before reading or writing household data.
+7. The client stores an active household selection and uses household-scoped APIs for chores, expenses, events, members, and messages.
 
 ## Main data entities
 
@@ -45,26 +46,14 @@ Container images are currently tagged with the first seven characters of the sou
 
 ## Security and tenancy status
 
-Firebase authentication is enabled. Chat verifies membership for its REST and Socket.IO operations, but `v0.2.0` does **not** provide complete household isolation:
+Firebase authentication is enabled. Chores, expenses, events, messages, and household reads use membership-checked, household-scoped routes. Socket.IO verifies active membership before joining or sending. The unscoped chore, expense, event, and chat route mounts have been removed. Household creation, invitations, and member removal use owner/member rules.
 
-- Chore, expense, event, and roommate endpoints are not consistently scoped by household membership.
-- Some resource lookups, updates, and deletes use only a resource ID.
-- New household-owned records require `householdId`, but existing records have not been migrated and may still lack it.
-- The shared default-household fallback has been removed; legacy create routes now require `householdId`.
-- A separate membership model and reusable authorization middleware exist, but the middleware is not yet wired into the household resource routes; embedded `Household.members` is still used by existing flows.
-- Roles and invitation lifecycle management are incomplete.
-- Legacy `roomId` records have not been migrated.
-
-For that reason, this version is suitable only for one trusted household. It should not be offered to unrelated households until every household-owned record has a household identifier and every API operation verifies membership and scopes its database operations.
+- New records require `householdId`; the default-household fallback is removed.
+- The migration script is available at [MIGRATION.md](./MIGRATION.md), but it must be run against existing data before that data is available through scoped routes.
+- Legacy `roomId` chat records remain readable and are handled by the migration.
+- The client selector is a UI convenience only; the server authorizes every scoped request independently.
+- Cross-household end-to-end testing and final release documentation remain before `v0.3.0` is complete.
 
 ## Next architecture milestone
 
-The `v0.3.0` architecture milestone should introduce:
-
-1. A documented migration for existing records with missing `householdId` or legacy `roomId`.
-2. Household-scoped creation routes that set `householdId` from authorized request context.
-3. Wire the existing household-membership middleware and membership records into protected routes.
-4. Household-scoped database operations and query indexes based on actual access patterns.
-5. Explicit update allowlists for all protected resources.
-6. Tests proving that a member of household A cannot read or change household B data.
-7. Secure invitations and household member lifecycle behavior.
+The remaining `v0.3.0` work is cross-household end-to-end testing, CI coverage, and release documentation. Operational rollout also requires a backup, migration dry run, and migration verification.

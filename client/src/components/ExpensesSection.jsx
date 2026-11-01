@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { apiDelete, apiGet, apiPost, apiPut } from "../api";
 import ConfirmDialog from "./ConfirmDialog";
 
-function ExpensesSection() {
+function ExpensesSection({ householdId, roommates, onHouseholdAccessError }) {
     const [expenses, setExpenses] = useState([]);
-    const [roommates, setRoommates] = useState([]);
     const [balances, setBalances] = useState([]);
 
     const [description, setDescription] = useState("");
@@ -17,32 +16,28 @@ function ExpensesSection() {
     const itemsPerPage = 5;
     const [confirmDelete, setConfirmDelete] = useState(null);
 
-    async function fetchRoommates() {
-        const res = await apiGet("/roommates");
-        setRoommates(Array.isArray(res.data) ? res.data : []);
-    }
-
-    async function fetchExpenses() {
-        const res = await apiGet("/expenses");
+    const fetchExpenses = useCallback(async () => {
+        const res = await apiGet(`/households/${householdId}/expenses`);
         setExpenses(Array.isArray(res.data) ? res.data : []);
-    }
+    }, [householdId]);
 
-    async function fetchBalances() {
-        const res = await apiGet("/expenses/balances/summary");
+    const fetchBalances = useCallback(async () => {
+        const res = await apiGet(`/households/${householdId}/expenses/balances/summary`);
         setBalances(Array.isArray(res.data) ? res.data : []);
-    }
+    }, [householdId]);
 
     useEffect(() => {
         const load = async () => {
             try {
-                await Promise.all([fetchRoommates(), fetchExpenses(), fetchBalances()]);
+                await Promise.all([fetchExpenses(), fetchBalances()]);
             } catch (err) {
                 console.error(err);
                 setError("Failed to load expenses data");
+                if (err.response?.status === 404) onHouseholdAccessError?.();
             }
         };
         load();
-    }, []);
+    }, [fetchBalances, fetchExpenses, householdId, onHouseholdAccessError]);
 
     async function handleAddExpense(e) {
         e.preventDefault();
@@ -100,10 +95,10 @@ function ExpensesSection() {
 
             let res;
             if (editingExpenseId) {
-                res = await apiPut(`/expenses/${editingExpenseId}`, payload);
+                res = await apiPut(`/households/${householdId}/expenses/${editingExpenseId}`, payload);
                 setExpenses((prev) => prev.map((e) => (e._id === editingExpenseId ? res.data : e)));
             } else {
-                res = await apiPost("/expenses", payload);
+                res = await apiPost(`/households/${householdId}/expenses`, payload);
                 setExpenses((prev) => [res.data, ...prev]);
             }
 
@@ -117,6 +112,7 @@ function ExpensesSection() {
         } catch (err) {
             console.error(err);
             setError(err.response?.data?.message || "Failed to save expense. Please try again.");
+            if (err.response?.status === 404) onHouseholdAccessError?.();
         }
     }
 
@@ -130,12 +126,13 @@ function ExpensesSection() {
 
         try {
             setError("");
-            await apiDelete(`/expenses/${id}`);
+            await apiDelete(`/households/${householdId}/expenses/${id}`);
             setExpenses((prev) => prev.filter((e) => e._id !== id));
             fetchBalances();
         } catch (err) {
             console.error(err);
             setError(err.response?.data?.message || "Failed to delete expense. Please try again.");
+            if (err.response?.status === 404) onHouseholdAccessError?.();
         }
     }
 
