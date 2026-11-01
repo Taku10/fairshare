@@ -115,6 +115,10 @@ This mirrors current CI jobs.
 
 Existing data needs a one-time migration before the household-scoped routes work for it. See [MIGRATION.md](./MIGRATION.md).
 
+## Client design foundation
+
+Shared visual tokens are defined in `client/src/styles/theme.css`. Use the shared `Button`, `Card`, `PageHeader`, `StatusMessage`, and `EmptyState` components from `client/src/components` for common UI patterns. Prefer semantic variants and CSS tokens over introducing one-off colors or interaction styles.
+
 ## Data model (high-level)
 New household-owned records require `householdId`. Existing records need the one-time migration described in [MIGRATION.md](./MIGRATION.md) before scoped routes can access them.
 

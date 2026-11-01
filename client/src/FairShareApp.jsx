@@ -5,8 +5,13 @@ import CalendarSection from "./components/CalendarSection";
 import ChatSection from "./components/ChatSection";
 import ChoresSection from "./components/ChoresSection";
 import ExpensesSection from "./components/ExpensesSection";
+import Button from "./components/Button";
+import Card from "./components/Card";
+import EmptyState from "./components/EmptyState";
+import PageHeader from "./components/PageHeader";
 import ProfileSection from "./components/ProfileSection";
 import RoommatesSection from "./components/RoommatesSection";
+import StatusMessage from "./components/StatusMessage";
 
 function FairShareApp() {
   const [activeTab, setActiveTab] = useState("chores");
@@ -19,7 +24,8 @@ function FairShareApp() {
   const [householdError, setHouseholdError] = useState("");
   const [newHouseholdName, setNewHouseholdName] = useState("");
   const [inviteCode, setInviteCode] = useState("");
-  const [householdActionLoading, setHouseholdActionLoading] = useState(false);
+  const [householdAction, setHouseholdAction] = useState("");
+  const householdActionLoading = Boolean(householdAction);
   const [inviteMessage, setInviteMessage] = useState("");
   const { currentUser } = useAuth();
   const householdStorageKey = `fairshare:active-household:${currentUser?.uid || ""}`;
@@ -86,7 +92,7 @@ function FairShareApp() {
     const name = newHouseholdName.trim();
     if (!name) return;
     try {
-      setHouseholdActionLoading(true);
+      setHouseholdAction("create");
       setHouseholdError("");
       const res = await apiPost("/households", { name });
       setNewHouseholdName("");
@@ -95,7 +101,7 @@ function FairShareApp() {
       console.error("Failed to create household", err);
       setHouseholdError(err.response?.data?.error || "Could not create household.");
     } finally {
-      setHouseholdActionLoading(false);
+      setHouseholdAction("");
     }
   }
 
@@ -104,7 +110,7 @@ function FairShareApp() {
     const code = inviteCode.trim();
     if (!code) return;
     try {
-      setHouseholdActionLoading(true);
+      setHouseholdAction("join");
       setHouseholdError("");
       const res = await apiPost(`/households/join/${encodeURIComponent(code)}`);
       setInviteCode("");
@@ -113,13 +119,13 @@ function FairShareApp() {
       console.error("Failed to join household", err);
       setHouseholdError(err.response?.data?.error || "Could not join household. Check the invite code and try again.");
     } finally {
-      setHouseholdActionLoading(false);
+      setHouseholdAction("");
     }
   }
 
   async function handleRotateInvite() {
     try {
-      setHouseholdActionLoading(true);
+      setHouseholdAction("invite");
       setHouseholdError("");
       const res = await apiPost(`/households/${activeHouseholdId}/invite`);
       setHouseholds((current) =>
@@ -132,13 +138,13 @@ function FairShareApp() {
       console.error("Failed to rotate invite code", err);
       setHouseholdError(err.response?.data?.error || "Could not create an invite code.");
     } finally {
-      setHouseholdActionLoading(false);
+      setHouseholdAction("");
     }
   }
 
   async function handleRevokeInvite() {
     try {
-      setHouseholdActionLoading(true);
+      setHouseholdAction("invite");
       setHouseholdError("");
       await apiDelete(`/households/${activeHouseholdId}/invite`);
       setHouseholds((current) =>
@@ -151,7 +157,7 @@ function FairShareApp() {
       console.error("Failed to revoke invite code", err);
       setHouseholdError(err.response?.data?.error || "Could not revoke the invite code.");
     } finally {
-      setHouseholdActionLoading(false);
+      setHouseholdAction("");
     }
   }
 
@@ -172,12 +178,7 @@ function FairShareApp() {
             gap: '1rem'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: '1 1 200px' }}>
-              <div>
-                <h1 className="app-title">FairShare</h1>
-                <p className="app-subtitle">
-                  Your household, perfectly balanced
-                </p>
-              </div>
+              <PageHeader title="FairShare" description="Your household, perfectly balanced" />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '0 0 auto', position: 'relative' }}>
               <button
@@ -241,7 +242,7 @@ function FairShareApp() {
         </div>
       </header>
 
-      <section className="section" aria-label="Active household" style={{ margin: "1rem auto", maxWidth: 1200 }}>
+      <Card as="section" className="section" aria-label="Active household" style={{ margin: "1rem auto", maxWidth: 1200 }}>
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.75rem" }}>
           <label htmlFor="active-household" style={{ fontWeight: 600 }}>Active household</label>
           <select
@@ -256,13 +257,16 @@ function FairShareApp() {
               <option key={household._id} value={household._id}>{household.name}</option>
             ))}
           </select>
-          <button type="button" className="btn btn-secondary" onClick={() => loadHouseholds()} disabled={householdsLoading}>
+          <Button variant="secondary" onClick={() => loadHouseholds()} disabled={householdsLoading}>
             Refresh
-          </button>
+          </Button>
         </div>
-        {householdError && <div className="message message-error" role="alert">{householdError}</div>}
+        {householdError && <StatusMessage variant="error">{householdError}</StatusMessage>}
         {!householdsLoading && households.length === 0 && (
-          <p className="empty-state-text">Create a household or join one with an invite code to get started.</p>
+          <EmptyState
+            title="Welcome to FairShare"
+            description="Create a household or join one with an invite code to get started."
+          />
         )}
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginTop: "0.75rem" }}>
           <form onSubmit={handleCreateHousehold} style={{ display: "flex", flex: "1 1 260px", gap: "0.5rem" }}>
@@ -274,9 +278,9 @@ function FairShareApp() {
               value={newHouseholdName}
               onChange={(event) => setNewHouseholdName(event.target.value)}
             />
-            <button type="submit" className="btn btn-primary" disabled={householdActionLoading || !newHouseholdName.trim()}>
+            <Button type="submit" loading={householdAction === "create"} loadingLabel="Creating household" disabled={householdActionLoading || !newHouseholdName.trim()}>
               Create
-            </button>
+            </Button>
           </form>
           <form onSubmit={handleJoinHousehold} style={{ display: "flex", flex: "1 1 260px", gap: "0.5rem" }}>
             <input
@@ -287,9 +291,9 @@ function FairShareApp() {
               value={inviteCode}
               onChange={(event) => setInviteCode(event.target.value.toUpperCase())}
             />
-            <button type="submit" className="btn btn-secondary" disabled={householdActionLoading || !inviteCode.trim()}>
+            <Button type="submit" variant="secondary" loading={householdAction === "join"} loadingLabel="Joining household" disabled={householdActionLoading || !inviteCode.trim()}>
               Join
-            </button>
+            </Button>
           </form>
         </div>
         {activeHousehold && isHouseholdOwner && (
@@ -304,19 +308,19 @@ function FairShareApp() {
               </span>
             )}
             <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
-              <button type="button" className="btn btn-secondary" onClick={handleRotateInvite} disabled={householdActionLoading}>
+              <Button variant="secondary" onClick={handleRotateInvite} loading={householdAction === "invite"} loadingLabel="Updating invitation">
                 Rotate code
-              </button>
+              </Button>
               {activeHousehold.code && new Date(activeHousehold.codeExpiresAt) > new Date() && (
-                <button type="button" className="btn btn-secondary" onClick={handleRevokeInvite} disabled={householdActionLoading}>
+                <Button variant="secondary" onClick={handleRevokeInvite} disabled={householdActionLoading}>
                   Revoke code
-                </button>
+                </Button>
               )}
             </div>
             {inviteMessage && <p role="status">{inviteMessage}</p>}
           </div>
         )}
-      </section>
+      </Card>
 
       {/* Profile Modal */}
       {showProfile && (

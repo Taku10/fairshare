@@ -1,22 +1,79 @@
 :root {
-  --primary: #4f46e5;
-  --primary-dark: #3730a3;
-  --primary-light: #818cf8;
-  --accent: #ec4899;
-  --accent-light: #f472b6;
-  --success: #22c55e;
-  --success-muted: #86efac;
-  --warning: #f59e0b;
-  --danger: #f87171;
-  --danger-muted: #fca5a5;
-  --bg-dark: #ffffff;
-  --bg-card: #ffffff;
-  --bg-light: #f8fafc;
-  --text-dark: #172033;
-  --text-light: #64748b;
-  --border: #dbe3ef;
-  --shadow: 0 16px 40px rgba(15, 23, 42, 0.1);
-  --shadow-sm: 0 6px 20px rgba(15, 23, 42, 0.07);
+  color-scheme: light;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  --color-page: #f5f7f5;
+  --color-surface: #ffffff;
+  --color-surface-muted: #edf2ef;
+  --color-primary: #263b35;
+  --color-primary-hover: #1c2d28;
+  --color-accent: #4c765f;
+  --color-accent-hover: #3b634e;
+  --color-success: #286344;
+  --color-success-surface: #eaf5ee;
+  --color-warning: #855f16;
+  --color-warning-surface: #fff6df;
+  --color-danger: #a53d3d;
+  --color-danger-surface: #fff0ef;
+  --color-text: #26332e;
+  --color-text-muted: #5e6d65;
+  --color-border: #d7e0da;
+  --color-focus: #427957;
+
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.75rem;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 2px 8px rgba(27, 45, 36, 0.06);
+  --shadow-overlay: 0 16px 40px rgba(27, 45, 36, 0.16);
+  --focus-ring: 0 0 0 3px rgba(66, 121, 87, 0.24);
+
+  --primary: var(--color-accent);
+  --primary-dark: var(--color-accent-hover);
+  --primary-light: #8eaa96;
+  --accent: #6d8b72;
+  --accent-light: #9fb6a2;
+  --success: var(--color-success);
+  --success-muted: #d5eadc;
+  --warning: #c38b24;
+  --danger: #cf6660;
+  --danger-muted: #f4d0cd;
+  --bg-dark: var(--color-surface);
+  --bg-card: var(--color-surface);
+  --bg-light: var(--color-surface-muted);
+  --text-dark: var(--color-text);
+  --text-light: var(--color-text-muted);
+  --border: var(--color-border);
+  --shadow: var(--shadow-overlay);
+  --shadow-sm: var(--shadow-card);
   --shadow-glow: none;
 }
-/* (removed dark mode variable overrides) */
+
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
