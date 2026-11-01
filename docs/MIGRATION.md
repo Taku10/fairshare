@@ -6,7 +6,7 @@ Moves pre-`v0.3.0` data onto the household model. Run it once per deployment, af
 
 1. **Backfills `HouseholdMembership`** for every existing household: each entry in `members` becomes a `member`, and `createdBy` becomes the `owner`. Existing memberships are left alone. Without this, current users get `404` from the household-scoped routes and the socket check.
 2. **Assigns `householdId`** to chores, expenses, events, and chat messages that lack it, using the household you pass with `--household`.
-   - A chat message that already has a `roomId` keeps that household. If the `roomId` matches no household, the record is reported as failed rather than guessed.
+   - A record that already has a `roomId` keeps that household. If the `roomId` matches no household, the record is reported as failed rather than guessed.
    - Records that already have a `householdId` are skipped and never overwritten.
 
 It does not delete anything, change `Household.members`, or touch user accounts. It is safe to run more than once.
@@ -52,5 +52,5 @@ Restoring discards anything written after the backup, so stop writes to the app 
 
 ## After migrating
 
-- The shared default-household fallback is gone: legacy `POST /api/chores|expenses|events` now return `400` without `householdId`. The frontend moves to the scoped routes in a later `v0.3.0` slice.
-- `roomId` compatibility on chat messages stays until a later cleanup PR.
+- The shared default-household fallback is gone, and unscoped `/api/chores`, `/api/expenses`, `/api/events`, and `/api/chat` routes are no longer mounted. Clients must use the household-scoped APIs.
+- Legacy `roomId` compatibility remains temporarily for household-owned records.

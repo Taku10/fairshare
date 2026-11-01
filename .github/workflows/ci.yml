@@ -43,7 +43,7 @@ jobs:
           path: client/dist
 
   server:
-    name: Server Install (sanity)
+    name: Server Install & Tests
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -65,6 +65,9 @@ jobs:
       - name: Verify entrypoint exists
         run: |
           test -f index.js && echo "index.js present"
+
+      - name: Run server tests
+        run: npm test
 
   deploy:
     name: Deploy to Firebase Hosting
