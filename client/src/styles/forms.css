@@ -10,11 +10,11 @@
 .form-textarea {
   padding: 0.75rem 1rem;
   border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  font-size: 0.95rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
   font-family: inherit;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  background: #ffffff;
+  background: var(--color-surface);
   color: var(--text-dark);
 }
 
@@ -37,7 +37,7 @@ input[type="number"] {
 
 /* Style select dropdown options */
 .form-select option {
-  background: #ffffff;
+  background: var(--color-surface);
   color: var(--text-dark);
   padding: 0.5rem;
 }
@@ -55,14 +55,14 @@ input[type="number"] {
   outline: none;
   border-color: var(--primary);
   background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.14);
+  box-shadow: var(--focus-ring);
 }
 
 .form-input:disabled,
 .form-select:disabled,
 .form-textarea:disabled {
-  background: #f1f5f9;
-  color: #64748b;
+  background: var(--color-surface-muted);
+  color: var(--color-text-muted);
 }
 
 .form-input {
