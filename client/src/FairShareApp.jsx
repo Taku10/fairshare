@@ -9,13 +9,14 @@ import Button from "./components/Button";
 import Card from "./components/Card";
 import HouseholdOnboarding from "./components/HouseholdOnboarding";
 import PageHeader from "./components/PageHeader";
+import OverviewSection from "./components/OverviewSection";
 import ProfileSection from "./components/ProfileSection";
 import RoommatesSection from "./components/RoommatesSection";
 import StatusMessage from "./components/StatusMessage";
 import ThemeToggle from "./components/ThemeToggle";
 
 function FairShareApp() {
-  const [activeTab, setActiveTab] = useState("chores");
+  const [activeTab, setActiveTab] = useState("overview");
   const [showProfile, setShowProfile] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef(null);
@@ -187,6 +188,7 @@ function FairShareApp() {
   };
 
   const activePage = {
+    overview: { title: "Overview", description: "What needs your attention today." },
     chores: { title: "Chores", description: "Keep household tasks moving." },
     expenses: { title: "Expenses", description: "Track shared costs and balances." },
     calendar: { title: "Calendar", description: "See household events and bill reminders." },
@@ -195,6 +197,7 @@ function FairShareApp() {
   }[activeTab];
 
   const navigationItems = [
+    { id: "overview", label: "Overview" },
     { id: "chores", label: "Chores" },
     { id: "expenses", label: "Expenses" },
     { id: "calendar", label: "Calendar" },
@@ -389,6 +392,17 @@ function FairShareApp() {
           <div className="empty-state">
             <p className="empty-state-text">Select or create a household to see its chores, expenses, members, and chat.</p>
           </div>
+        )}
+        {activeHousehold && activeTab === "overview" && (
+          <OverviewSection
+            key={`overview-${activeHouseholdId}`}
+            householdId={activeHouseholdId}
+            household={activeHousehold}
+            currentUserId={profile?._id}
+            isOwner={isHouseholdOwner}
+            onNavigate={setActiveTab}
+            onHouseholdAccessError={handleHouseholdAccessError}
+          />
         )}
         {activeHousehold && activeTab === "chores" && (
           <ChoresSection
