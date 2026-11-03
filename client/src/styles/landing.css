@@ -3,9 +3,7 @@
   min-height: 100vh;
   flex-direction: column;
   color: var(--color-text);
-  background:
-    radial-gradient(ellipse at 82% 24%, rgba(116, 121, 159, 0.11), transparent 34rem),
-    var(--color-page);
+  background: var(--color-page);
 }
 
 .landing-header,
@@ -38,7 +36,7 @@
   height: 2rem;
   place-items: center;
   color: white;
-  background: var(--color-primary);
+  background: var(--color-header);
   border-radius: 0.7rem;
   font-size: 1.15rem;
 }
@@ -54,12 +52,12 @@
   font: inherit;
   font-size: var(--font-size-sm);
   font-weight: 600;
-  transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+  transition: background-color var(--duration-fast) var(--ease-smooth), border-color var(--duration-fast) var(--ease-smooth), transform var(--duration-fast) var(--ease-smooth);
 }
 
 .landing-sign-in:hover {
   background: var(--color-surface-muted);
-  border-color: var(--color-accent);
+  border-color: var(--color-primary);
   transform: translateY(-1px);
 }
 
@@ -77,7 +75,7 @@
   grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 0.85fr);
   align-items: center;
   gap: clamp(3rem, 8vw, 7rem);
-  animation: landing-enter 500ms ease both;
+  animation: landing-enter var(--duration-page) var(--ease-smooth) both;
 }
 
 .landing-copy {
@@ -86,7 +84,7 @@
 
 .landing-eyebrow {
   margin-bottom: 1.25rem;
-  color: var(--color-accent);
+  color: var(--color-action);
   font-size: var(--font-size-sm);
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -95,7 +93,7 @@
 
 .landing-copy h1 {
   max-width: 11ch;
-  color: var(--color-primary);
+  color: var(--color-text);
   font-size: clamp(3rem, 7vw, 5.6rem);
   font-weight: 700;
   letter-spacing: -0.065em;
@@ -103,7 +101,7 @@
 }
 
 .landing-copy h1 span {
-  color: var(--color-accent);
+  color: var(--color-action);
 }
 
 .landing-description {
@@ -123,25 +121,25 @@
   margin-top: 2rem;
   padding: 0.75rem 1.25rem;
   color: white;
-  background: var(--color-accent);
+  background: var(--color-action-fill);
   border: 0;
   border-radius: var(--radius-md);
-  box-shadow: 0 8px 20px rgba(62, 66, 104, 0.16);
+  box-shadow: 0 4px 12px rgba(120, 55, 22, 0.14);
   cursor: pointer;
   font: inherit;
   font-weight: 600;
-  transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+  transition: background-color var(--duration-fast) var(--ease-smooth), box-shadow var(--duration-fast) var(--ease-smooth), transform var(--duration-fast) var(--ease-smooth);
 }
 
 .landing-cta:hover {
-  background: var(--color-accent-hover);
-  box-shadow: 0 10px 24px rgba(62, 66, 104, 0.2);
+  background: var(--color-action-fill-hover);
+  box-shadow: 0 6px 16px rgba(120, 55, 22, 0.18);
   transform: translateY(-2px);
 }
 
 .landing-cta span {
   font-size: 1.15rem;
-  transition: transform 180ms ease;
+  transition: transform var(--duration-fast) var(--ease-smooth);
 }
 
 .landing-cta:hover span {
@@ -156,11 +154,10 @@
 
 .landing-summary {
   padding: 0.5rem 1.5rem;
-  background: rgba(255, 255, 255, 0.76);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  backdrop-filter: blur(12px);
 }
 
 .landing-summary__item {
@@ -176,7 +173,7 @@
 
 .landing-summary__number {
   padding-top: 0.15rem;
-  color: var(--color-accent);
+  color: var(--color-action);
   font-size: var(--font-size-sm);
   font-weight: 700;
   font-variant-numeric: tabular-nums;

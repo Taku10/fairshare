@@ -19,27 +19,30 @@ const firebaseConfig = {
   measurementId: runtimeEnv.FIREBASE_MEASUREMENT_ID || import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-// Initialize analytics (not used directly but important for Firebase tracking)
-try {
-  if (typeof window !== 'undefined') {
-    getAnalytics(app);
-  }
-} catch (e) {
-  console.warn('Analytics initialization skipped:', e);
-}
-const auth = getAuth(app);
+const authConfigured = Boolean(
+  firebaseConfig.apiKey &&
+  firebaseConfig.authDomain &&
+  firebaseConfig.projectId &&
+  firebaseConfig.appId
+);
 
-// Prevent cross-tab auth mirroring by scoping auth state per-tab.
-// Use sessionStorage (per-tab) or in-memory (per-window) based on env flag.
-{
+let auth = null;
+if (authConfigured) {
+  const app = initializeApp(firebaseConfig);
+  try {
+    if (typeof window !== "undefined") {
+      getAnalytics(app);
+    }
+  } catch (error) {
+    console.warn("Analytics initialization skipped:", error);
+  }
+  auth = getAuth(app);
+
   const useMemory = import.meta.env.VITE_AUTH_IN_MEMORY === 'true';
-  // Avoid top-level await: fire-and-forget with catch
   setPersistence(auth, useMemory ? inMemoryPersistence : browserSessionPersistence)
     .catch((e) => {
       console.warn('Auth persistence setup failed, falling back to default:', e);
     });
 }
 
-export { auth };
+export { auth, authConfigured };

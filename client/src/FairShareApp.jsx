@@ -12,6 +12,7 @@ import PageHeader from "./components/PageHeader";
 import ProfileSection from "./components/ProfileSection";
 import RoommatesSection from "./components/RoommatesSection";
 import StatusMessage from "./components/StatusMessage";
+import ThemeToggle from "./components/ThemeToggle";
 
 function FairShareApp() {
   const [activeTab, setActiveTab] = useState("chores");
@@ -251,6 +252,7 @@ function FairShareApp() {
                       <strong>{profile?.displayName || currentUser?.displayName || "Your account"}</strong>
                       <span>{currentUser?.email}</span>
                     </div>
+                    <ThemeToggle />
                     <button
                       type="button"
                       onClick={() => {
@@ -358,61 +360,18 @@ function FairShareApp() {
       {/* Profile Modal */}
       {showProfile && (
         <div 
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0, 0, 0, 0.7)',
-            backdropFilter: 'blur(5px)',
-            zIndex: 1000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1rem',
-            animation: 'fadeIn 0.3s ease'
-          }}
+          className="profile-dialog-overlay"
           onClick={() => setShowProfile(false)}
         >
           <div 
-            style={{
-              maxWidth: '600px',
-              width: '100%',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              position: 'relative'
-            }}
+            className="profile-dialog"
             onClick={(e) => e.stopPropagation()}
           >
             <button
+              type="button"
+              className="profile-dialog__close"
+              aria-label="Close profile"
               onClick={handleProfileClose}
-              style={{
-                position: 'absolute',
-                top: '1rem',
-                right: '1rem',
-                background: 'rgba(255, 255, 255, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                borderRadius: '50%',
-                width: '36px',
-                height: '36px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                fontSize: '1.5rem',
-                color: 'var(--text-dark)',
-                zIndex: 10,
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
-                e.currentTarget.style.transform = 'rotate(90deg)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                e.currentTarget.style.transform = 'rotate(0deg)';
-              }}
             >
               ×
             </button>

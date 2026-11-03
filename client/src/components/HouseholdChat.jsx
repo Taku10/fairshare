@@ -102,9 +102,9 @@ function HouseholdChat({
     <div style={{
       display: 'flex',
       flexDirection: 'column',
-      border: '1px solid #e5e7eb',
-      borderRadius: 12,
-      background: '#f8fafc',
+      border: '1px solid var(--color-border)',
+      borderRadius: 'var(--radius-xl)',
+      background: 'var(--color-surface)',
       height: 480,
       overflow: 'hidden'
     }}>
@@ -115,11 +115,11 @@ function HouseholdChat({
             : socketError}
         </div>
       )}
-      <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid #e2e8f0', background: '#fff' }}>
+      <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--color-border)', background: 'var(--color-surface)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <div style={{ fontWeight: 700, fontSize: '1rem', color: '#0f172a' }}>{household?.name || 'Household Chat'}</div>
-            <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: 2 }}>
+            <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--color-text)' }}>{household?.name || 'Household Chat'}</div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: 2 }}>
               {household?.members?.length || 0} member{household?.members?.length === 1 ? '' : 's'} • {messages.length} message{messages.length === 1 ? '' : 's'}
             </div>
           </div>
@@ -137,15 +137,15 @@ function HouseholdChat({
                       width: 32,
                       height: 32,
                       borderRadius: '50%',
-                      background: messageCount > 0 ? '#4f46e5' : '#e5e7eb',
-                      color: messageCount > 0 ? '#fff' : '#64748b',
+                      background: messageCount > 0 ? 'var(--color-action-fill)' : 'var(--color-surface-muted)',
+                      color: messageCount > 0 ? '#fff' : 'var(--color-text-muted)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontSize: '0.7rem',
                       fontWeight: 700,
-                      border: '2px solid #fff',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                      border: '2px solid var(--color-surface)',
+                      boxShadow: 'var(--shadow-card)'
                     }}
                   >
                     {initials}
@@ -163,7 +163,7 @@ function HouseholdChat({
           flex: 1,
           overflowY: 'auto',
           padding: '0.75rem',
-          background: '#eef2ff',
+          background: 'var(--color-page)',
           display: 'flex',
           flexDirection: 'column',
           gap: '0.5rem'
@@ -182,12 +182,12 @@ function HouseholdChat({
               <div
                 style={{
                   maxWidth: '70%',
-                  background: mine ? '#4f46e5' : '#fff',
-                  color: mine ? '#fff' : '#0f172a',
+                  background: mine ? 'var(--color-action-fill)' : 'var(--color-surface)',
+                  color: mine ? '#fff' : 'var(--color-text)',
                   padding: '0.65rem 0.75rem',
                   borderRadius: mine ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                   boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-                  border: mine ? '1px solid #4338ca' : '1px solid #e5e7eb',
+                  border: mine ? '1px solid var(--color-action-fill)' : '1px solid var(--color-border)',
                   fontSize: '0.95rem',
                   lineHeight: 1.4,
                 }}
@@ -215,15 +215,16 @@ function HouseholdChat({
         <div ref={bottomRef} />
       </div>
 
-      <form onSubmit={handleSend} style={{ display: 'flex', gap: '0.5rem', padding: '0.75rem', background: '#fff', borderTop: '1px solid #e2e8f0' }}>
+      <form onSubmit={handleSend} style={{ display: 'flex', gap: '0.5rem', padding: '0.75rem', background: 'var(--color-surface)', borderTop: '1px solid var(--color-border)' }}>
         <input
           type="text"
           placeholder="Type a message..."
           value={text}
           onChange={(e) => setText(e.target.value)}
-          style={{ flex: 1, padding: '0.6rem 0.8rem', borderRadius: 10, border: '1px solid #cbd5e1', background: '#f8fafc' }}
+          className="form-input"
+          style={{ flex: 1, minWidth: 0 }}
         />
-        <button type="submit" style={{ padding: '0.6rem 1.1rem', borderRadius: 10, background: '#4f46e5', color: '#fff', border: 'none', fontWeight: 700 }}>
+        <button type="submit" className="btn btn-primary">
           Send
         </button>
       </form>

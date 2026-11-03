@@ -125,7 +125,7 @@ function RoommatesSection({
                           height: 36,
                           borderRadius: "50%",
                           background: "var(--bg-light)",
-                          border: "1px solid #e5e7eb",
+                          border: "1px solid var(--color-border)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",

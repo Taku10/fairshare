@@ -9,4 +9,16 @@ body {
   background: var(--color-page);
   color: var(--color-text);
   line-height: 1.6;
+  transition: background-color var(--duration-page) var(--ease-smooth), color var(--duration-page) var(--ease-smooth);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
 }
