@@ -3,14 +3,15 @@ function ConfirmDialog({ isOpen, title, message, onConfirm, onCancel }) {
 
     return (
         <div 
+            className="confirm-dialog-overlay"
             style={{
                 position: "fixed",
                 top: 0,
                 left: 0,
                 right: 0,
                 bottom: 0,
-                backgroundColor: "rgba(0, 0, 0, 0.7)",
-                backdropFilter: "blur(5px)",
+                backgroundColor: "rgba(20, 19, 18, 0.58)",
+                backdropFilter: "blur(3px)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -19,15 +20,15 @@ function ConfirmDialog({ isOpen, title, message, onConfirm, onCancel }) {
             onClick={onCancel}
         >
             <div 
+                className="confirm-dialog"
                 style={{
-                    background: "rgba(30, 41, 59, 0.95)",
-                    backdropFilter: "blur(20px)",
-                    border: "1px solid rgba(102, 126, 234, 0.25)",
-                    borderRadius: "12px",
+                    background: "var(--color-surface)",
+                    border: "1px solid var(--color-border)",
+                    borderRadius: "var(--radius-xl)",
                     padding: "2rem",
                     maxWidth: "400px",
                     width: "90%",
-                    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.5)",
+                    boxShadow: "var(--shadow-overlay)",
                 }}
                 onClick={(e) => e.stopPropagation()}
             >

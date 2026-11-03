@@ -5,7 +5,7 @@ import { useAuth } from "./AuthContext";
 import { auth } from "./firebase";
 
 function AuthPage({ onBack }) {
-  const { currentUser } = useAuth();
+  const { currentUser, authConfigured } = useAuth();
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -15,6 +15,10 @@ function AuthPage({ onBack }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+    if (!authConfigured) {
+      setError("Sign-in is unavailable until Firebase web app settings are configured.");
+      return;
+    }
 
     try {
       if (isRegister) {
@@ -55,6 +59,12 @@ function AuthPage({ onBack }) {
             : "Log in to sync chores, track expenses, and keep the house in flow."}
         </p>
 
+        {!authConfigured && (
+          <div className="auth-alert auth-alert--config" role="status">
+            Add your Firebase web app settings to <code>client/.env</code> to enable sign-in.
+            The landing page can be previewed without them.
+          </div>
+        )}
         {error && <div className="auth-alert">{error}</div>}
 
         <form className="auth-form" onSubmit={handleSubmit}>
@@ -95,14 +105,14 @@ function AuthPage({ onBack }) {
             />
           </label>
 
-          <button type="submit" className="btn btn-primary auth-submit">
+          <button type="submit" className="btn btn-primary auth-submit" disabled={!authConfigured}>
             {isRegister ? "Create account" : "Sign in"}
           </button>
         </form>
 
         <div className="auth-footer">
           <span>{isRegister ? "Already have an account?" : "New here?"}</span>
-          <button type="button" className="auth-toggle" onClick={() => setIsRegister((b) => !b)}>
+          <button type="button" className="auth-toggle" onClick={() => setIsRegister((b) => !b)} disabled={!authConfigured}>
             {isRegister ? "Switch to sign in" : "Switch to create one"}
           </button>
         </div>

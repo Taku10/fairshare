@@ -7,14 +7,14 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(8px);
+  background: rgba(20, 19, 18, 0.58);
+  backdrop-filter: blur(3px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   padding: 1rem;
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn var(--duration-page) var(--ease-smooth);
 }
 
 @keyframes fadeIn {
@@ -25,14 +25,14 @@
 .calendar-modal {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   width: 95%;
   max-width: 1400px;
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
-  animation: modalSlideIn 0.3s ease;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: modalSlideIn var(--duration-page) var(--ease-smooth);
+  box-shadow: var(--shadow-overlay);
 }
 
 .calendar-modal-close {
@@ -50,7 +50,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: background-color var(--duration-fast) var(--ease-smooth), color var(--duration-fast) var(--ease-smooth), transform var(--duration-fast) var(--ease-smooth);
   z-index: 10;
 }
 
@@ -100,18 +100,18 @@
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-muted);
-  transition: all 0.2s ease;
+  transition: border-color var(--duration-fast) var(--ease-smooth), background-color var(--duration-fast) var(--ease-smooth), box-shadow var(--duration-fast) var(--ease-smooth), transform var(--duration-fast) var(--ease-smooth);
 }
 
 .view-toggle-btn:hover {
-  background: rgba(98, 104, 143, 0.1);
+  background: var(--color-primary-light);
   color: var(--text);
 }
 
 .view-toggle-btn.active {
   background: var(--primary);
   color: white;
-  box-shadow: 0 2px 8px rgba(98, 104, 143, 0.22);
+  box-shadow: 0 2px 8px rgba(120, 55, 22, 0.12);
 }
 
 .view-toggle-btn .view-icon {
@@ -188,7 +188,7 @@
   cursor: pointer;
   font-size: 1rem;
   color: var(--text);
-  transition: all 0.2s ease;
+  transition: background-color var(--duration-fast) var(--ease-smooth), border-color var(--duration-fast) var(--ease-smooth), color var(--duration-fast) var(--ease-smooth);
 }
 
 .btn-icon:hover {
@@ -226,7 +226,7 @@
   border-radius: 8px;
   padding: 0.5rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color var(--duration-fast) var(--ease-smooth), border-color var(--duration-fast) var(--ease-smooth), box-shadow var(--duration-fast) var(--ease-smooth), transform var(--duration-fast) var(--ease-smooth);
   display: flex;
   flex-direction: column;
 }
@@ -249,7 +249,7 @@
 }
 
 .calendar-day.today {
-  background: rgba(98, 104, 143, 0.1);
+  background: var(--color-primary-light);
   border-color: var(--primary);
 }
 
@@ -267,7 +267,7 @@
 .calendar-day.selected {
   border-color: var(--primary);
   border-width: 2px;
-  box-shadow: 0 0 0 3px rgba(98, 104, 143, 0.18);
+  box-shadow: var(--focus-ring);
 }
 
 .calendar-day.has-events {
@@ -333,8 +333,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(8px);
+  background: rgba(20, 19, 18, 0.58);
+  backdrop-filter: blur(3px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -345,15 +345,15 @@
 .modal-content {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   padding: 0;
   max-width: 550px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
-  animation: modalSlideIn 0.3s ease;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: modalSlideIn var(--duration-page) var(--ease-smooth);
+  box-shadow: var(--shadow-overlay);
 }
 
 .modal-content form {
@@ -390,7 +390,7 @@
   border-radius: 10px;
   font-size: 1rem;
   font-family: inherit;
-  transition: all 0.2s ease;
+  transition: border-color var(--duration-fast) var(--ease-smooth), background-color var(--duration-fast) var(--ease-smooth), box-shadow var(--duration-fast) var(--ease-smooth);
   background: var(--bg);
   color: var(--text);
   width: 100%;
@@ -402,7 +402,7 @@
 .modal-content .form-group textarea:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(98, 104, 143, 0.14);
+  box-shadow: var(--focus-ring);
 }
 
 .modal-content .form-group textarea {
@@ -430,13 +430,13 @@
   font-weight: 600;
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color var(--duration-fast) var(--ease-smooth), color var(--duration-fast) var(--ease-smooth), border-color var(--duration-fast) var(--ease-smooth), transform var(--duration-fast) var(--ease-smooth);
 }
 
 @keyframes modalSlideIn {
   from {
     opacity: 0;
-    transform: translateY(-20px) scale(0.95);
+    transform: translateY(6px) scale(0.99);
   }
   to {
     opacity: 1;
@@ -450,8 +450,8 @@
   align-items: center;
   padding: 1.5rem 2rem;
   border-bottom: 1px solid var(--border);
-  background: linear-gradient(135deg, rgba(98, 104, 143, 0.1) 0%, rgba(116, 121, 159, 0.1) 100%);
-  border-radius: 16px 16px 0 0;
+  background: var(--color-primary-light);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
 }
 
 .modal-header h3 {
@@ -479,7 +479,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: border-color var(--duration-fast) var(--ease-smooth), background-color var(--duration-fast) var(--ease-smooth), box-shadow var(--duration-fast) var(--ease-smooth), transform var(--duration-fast) var(--ease-smooth);
   line-height: 1;
 }
 
@@ -573,7 +573,7 @@
   color: var(--text);
   font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: border-color var(--duration-fast) var(--ease-smooth), box-shadow var(--duration-fast) var(--ease-smooth);
 }
 
 .filter-select:hover {
@@ -583,7 +583,7 @@
 .filter-select:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(98, 104, 143, 0.1);
+  box-shadow: var(--focus-ring);
 }
 
 .roommate-chips {
@@ -601,11 +601,11 @@
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 600;
-  transition: all 0.2s ease;
+  transition: background-color var(--duration-fast) var(--ease-smooth), color var(--duration-fast) var(--ease-smooth), border-color var(--duration-fast) var(--ease-smooth), transform var(--duration-fast) var(--ease-smooth);
 }
 
 .chip:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
@@ -670,23 +670,23 @@
 }
 
 /* Dark theme adjustments */
-:root[data-theme="dark"] .event-card {
+:root.dark .event-card {
   background: var(--card-bg);
   border-color: var(--border);
 }
 
-:root[data-theme="dark"] .alert-warning {
-  background: #664d03;
-  border-color: #997404;
-  color: #ffecb5;
+:root.dark .alert-warning {
+  background: var(--color-warning-surface);
+  border-color: var(--color-border);
+  color: var(--color-warning);
 }
 
-:root[data-theme="dark"] .calendar-day {
+:root.dark .calendar-day {
   background: var(--bg);
 }
 
-:root[data-theme="dark"] .calendar-day.today {
-  background: rgba(98, 104, 143, 0.15);
+:root.dark .calendar-day.today {
+  background: var(--color-primary-light);
 }
 
 /* Responsive design */

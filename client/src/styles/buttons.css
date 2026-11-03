@@ -2,12 +2,12 @@
   min-height: 2.75rem;
   padding: 0.65rem 1rem;
   border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  border-radius: 0.75rem;
   font: inherit;
   font-size: var(--font-size-sm);
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+  transition: background-color var(--duration-fast) var(--ease-smooth), color var(--duration-fast) var(--ease-smooth), border-color var(--duration-fast) var(--ease-smooth), box-shadow var(--duration-fast) var(--ease-smooth), transform var(--duration-fast) var(--ease-smooth);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -21,32 +21,43 @@
 }
 
 .btn-primary {
-  background: var(--color-accent);
+  background: var(--color-action-fill);
   color: #fff;
+  box-shadow: 0 2px 6px rgba(120, 55, 22, 0.14);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--color-accent-hover);
+  background: var(--color-action-fill-hover);
+  box-shadow: 0 4px 10px rgba(120, 55, 22, 0.18);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active:not(:disabled) {
+  background: var(--color-action-fill-active);
+  box-shadow: none;
+  transform: translateY(0);
 }
 
 .btn-danger {
   background: var(--color-danger-surface);
   color: var(--color-danger);
-  border-color: #efcfcc;
+  border-color: color-mix(in srgb, var(--color-danger), transparent 70%);
 }
 
 .btn-danger:hover:not(:disabled) {
-  background: #f9e1df;
+  background: var(--color-danger-surface);
+  border-color: var(--color-danger);
 }
 
 .btn-success {
   background: var(--color-success-surface);
   color: var(--color-success);
-  border-color: #d3ddeb;
+  border-color: color-mix(in srgb, var(--color-success), transparent 70%);
 }
 
 .btn-success:hover:not(:disabled) {
-  background: #e1e7f2;
+  background: var(--color-success-surface);
+  border-color: var(--color-success);
 }
 
 .btn-secondary {
@@ -57,7 +68,8 @@
 
 .btn-secondary:hover:not(:disabled) {
   background: var(--color-surface-muted);
-  border-color: var(--color-accent);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
 }
 
 .btn-logout {
@@ -71,7 +83,7 @@
 }
 
 .btn:active:not(:disabled) {
-  transform: translateY(1px);
+  transform: translateY(0);
 }
 
 .list-item-actions .btn {

@@ -1,15 +1,16 @@
 // client/src/AuthContext.jsx
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { createContext, useContext, useEffect, useState } from "react";
-import { auth } from "./firebase";
+import { auth, authConfigured } from "./firebase";
 
-const AuthContext = createContext(null);
+const AuthContext = createContext({ currentUser: null, authLoading: false, authConfigured: false });
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(authConfigured);
 
   useEffect(() => {
+    if (!auth) return undefined;
     const unsub = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setAuthLoading(false);
@@ -18,6 +19,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const logout = async () => {
+    if (!auth) return;
     try {
       await signOut(auth);
       setCurrentUser(null);
@@ -27,7 +29,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, authLoading, logout }}>
+    <AuthContext.Provider value={{ currentUser, authLoading, authConfigured, logout }}>
       {children}
     </AuthContext.Provider>
   );

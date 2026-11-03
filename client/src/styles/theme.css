@@ -2,23 +2,33 @@
   color-scheme: light;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
-  --color-page: #f5f5f9;
+  --color-primary: #e58a54;
+  --color-primary-hover: #d97745;
+  --color-primary-active: #c76536;
+  --color-primary-light: #fff0e5;
+  --color-action: #a64f20;
+  --color-action-hover: #91431b;
+  --color-action-active: #783716;
+  --color-action-fill: #a64f20;
+  --color-action-fill-hover: #91431b;
+  --color-action-fill-active: #783716;
+  --color-header: #39332e;
+  --color-on-header: #ffffff;
+
+  --color-page: #faf9f6;
   --color-surface: #ffffff;
-  --color-surface-muted: #efeff6;
-  --color-primary: #2c2d45;
-  --color-primary-hover: #222338;
-  --color-accent: #62688f;
-  --color-accent-hover: #525879;
-  --color-success: #496184;
-  --color-success-surface: #edf1f8;
-  --color-warning: #806b48;
-  --color-warning-surface: #f8f4eb;
+  --color-surface-muted: #f4f2ef;
+  --color-text: #252525;
+  --color-text-muted: #737373;
+  --color-border: #e9e6e2;
+  --color-focus: var(--color-action);
+
+  --color-success: #276749;
+  --color-success-surface: #eaf5ee;
+  --color-warning: #855b16;
+  --color-warning-surface: #fff6df;
   --color-danger: #a53d3d;
   --color-danger-surface: #fff0ef;
-  --color-text: #2d2e40;
-  --color-text-muted: #67697c;
-  --color-border: #dedee9;
-  --color-focus: #62688f;
 
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
@@ -32,25 +42,30 @@
   --space-6: 1.5rem;
   --space-8: 2rem;
 
-  --radius-sm: 0.375rem;
-  --radius-md: 0.625rem;
-  --radius-lg: 0.875rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
   --radius-pill: 999px;
 
-  --shadow-card: 0 2px 8px rgba(39, 39, 67, 0.05);
-  --shadow-overlay: 0 16px 40px rgba(39, 39, 67, 0.14);
-  --focus-ring: 0 0 0 3px rgba(98, 104, 143, 0.22);
+  --shadow-card: 0 2px 8px rgba(37, 37, 37, 0.045);
+  --shadow-card-hover: 0 5px 16px rgba(37, 37, 37, 0.07);
+  --shadow-overlay: 0 16px 40px rgba(37, 37, 37, 0.14);
+  --focus-ring: 0 0 0 3px rgba(166, 79, 32, 0.2);
+  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 200ms;
+  --duration-page: 300ms;
 
-  --primary: var(--color-accent);
-  --primary-dark: var(--color-accent-hover);
-  --primary-light: #a3a6c1;
-  --accent: #74799f;
-  --accent-light: #aaaec8;
+  --primary: var(--color-action-fill);
+  --primary-dark: var(--color-action-fill-hover);
+  --primary-light: var(--color-primary-light);
+  --accent: var(--color-action-fill);
+  --accent-light: var(--color-primary);
   --success: var(--color-success);
-  --success-muted: #dce4f0;
-  --warning: #a98d5d;
-  --danger: #cf6660;
-  --danger-muted: #f4d0cd;
+  --success-muted: var(--color-success-surface);
+  --warning: var(--color-warning);
+  --danger: var(--color-danger);
+  --danger-muted: var(--color-danger-surface);
   --bg-dark: var(--color-surface);
   --bg-card: var(--color-surface);
   --bg-light: var(--color-surface-muted);
@@ -60,6 +75,46 @@
   --shadow: var(--shadow-overlay);
   --shadow-sm: var(--shadow-card);
   --shadow-glow: none;
+  --bg: var(--color-page);
+  --card-bg: var(--color-surface);
+  --text: var(--color-text);
+  --text-muted: var(--color-text-muted);
+
+  background: var(--color-page);
+}
+
+:root.dark {
+  color-scheme: dark;
+
+  --color-primary-light: #4a3326;
+  --color-action: #f0a06c;
+  --color-action-hover: #f5b384;
+  --color-action-active: #df8c57;
+  --color-action-fill: #a64f20;
+  --color-action-fill-hover: #91431b;
+  --color-action-fill-active: #783716;
+  --color-header: #171615;
+  --color-on-header: #f5f2ee;
+
+  --color-page: #191817;
+  --color-surface: #242220;
+  --color-surface-muted: #302d2a;
+  --color-text: #f5f2ee;
+  --color-text-muted: #c0bbb5;
+  --color-border: #403c38;
+  --color-focus: #f0a06c;
+
+  --color-success: #8ed0a8;
+  --color-success-surface: #263b2d;
+  --color-warning: #e7c37b;
+  --color-warning-surface: #413621;
+  --color-danger: #f19b93;
+  --color-danger-surface: #422b29;
+
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.18);
+  --shadow-card-hover: 0 5px 18px rgba(0, 0, 0, 0.26);
+  --shadow-overlay: 0 16px 40px rgba(0, 0, 0, 0.36);
+  --focus-ring: 0 0 0 3px rgba(240, 160, 108, 0.25);
 }
 
 :focus-visible {

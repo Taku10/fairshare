@@ -8,12 +8,13 @@
 .form-input,
 .form-select,
 .form-textarea {
+  min-height: 2.75rem;
   padding: 0.75rem 1rem;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   font-size: var(--font-size-base);
   font-family: inherit;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: background-color var(--duration-fast) var(--ease-smooth), border-color var(--duration-fast) var(--ease-smooth), box-shadow var(--duration-fast) var(--ease-smooth);
   background: var(--color-surface);
   color: var(--text-dark);
 }
@@ -53,8 +54,8 @@ input[type="number"] {
 .form-select:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: var(--primary);
-  background: #ffffff;
+  border-color: var(--color-action);
+  background: var(--color-surface);
   box-shadow: var(--focus-ring);
 }
 
@@ -63,6 +64,18 @@ input[type="number"] {
 .form-textarea:disabled {
   background: var(--color-surface-muted);
   color: var(--color-text-muted);
+}
+
+.form-input[aria-invalid="true"],
+.form-select[aria-invalid="true"],
+.form-textarea[aria-invalid="true"] {
+  border-color: var(--color-danger);
+}
+
+.form-input[aria-invalid="true"]:focus,
+.form-select[aria-invalid="true"]:focus,
+.form-textarea[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger), transparent 82%);
 }
 
 .form-input {

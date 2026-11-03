@@ -6,11 +6,11 @@
 }
 
 .list-item {
-  background: #f8fafc;
+  background: var(--color-surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 1.25rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  transition: background-color var(--duration-fast) var(--ease-smooth), border-color var(--duration-fast) var(--ease-smooth), box-shadow var(--duration-fast) var(--ease-smooth), transform var(--duration-fast) var(--ease-smooth);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -25,21 +25,20 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.4), transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-primary), transparent 35%), transparent);
 }
 
 .list-item:hover {
-  border-color: rgba(102, 126, 234, 0.5);
+  border-color: color-mix(in srgb, var(--color-primary), var(--color-border) 50%);
   box-shadow: var(--shadow-sm);
-  transform: translateY(-2px);
-  background: #ffffff;
+  transform: translateY(-1px);
+  background: var(--color-surface);
 }
 
 .list-item.completed {
   opacity: 0.7;
-  background: rgba(98, 104, 143, 0.05);
-  border-color: rgba(98, 104, 143, 0.24);
-  backdrop-filter: blur(20px);
+  background: var(--color-success-surface);
+  border-color: color-mix(in srgb, var(--color-success), var(--color-border) 78%);
 }
 
 .list-item-content {
@@ -69,7 +68,7 @@
 .list-item-badge {
   display: inline-block;
   padding: 0.25rem 0.75rem;
-  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+  background: var(--color-action);
   color: white;
   border-radius: 20px;
   font-size: 0.75rem;

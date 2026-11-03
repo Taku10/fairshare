@@ -20,6 +20,7 @@ export function ThemeProvider({ children }) {
     } else {
       root.classList.remove("dark");
     }
+    root.dataset.theme = theme;
   }, [theme]);
 
   useEffect(() => {

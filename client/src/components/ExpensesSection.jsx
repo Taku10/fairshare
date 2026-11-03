@@ -241,13 +241,13 @@ function ExpensesSection({ householdId, roommates, onHouseholdAccessError }) {
                                             display: "inline-flex",
                                             alignItems: "center",
                                             gap: "0.5rem",
-                                            background: "rgba(99, 102, 241, 0.12)",
-                                            color: "var(--primary)",
+                                            background: "var(--color-primary-light)",
+                                            color: "var(--color-action)",
                                             padding: "0.5rem 0.75rem",
                                             borderRadius: "999px",
                                             fontSize: "0.9rem",
                                             fontWeight: 600,
-                                            border: "1px solid rgba(99, 102, 241, 0.2)"
+                                            border: "1px solid color-mix(in srgb, var(--color-primary), transparent 70%)"
                                         }}
                                     >
                                         {rm.displayName || (rm.email ? rm.email.split("@")[0] : "Roommate")}
@@ -257,7 +257,7 @@ function ExpensesSection({ householdId, roommates, onHouseholdAccessError }) {
                                             style={{
                                                 background: "none",
                                                 border: "none",
-                                                color: "var(--primary)",
+                                                color: "var(--color-action)",
                                                 cursor: "pointer",
                                                 fontSize: "1.1rem",
                                                 lineHeight: 1,
@@ -294,11 +294,10 @@ function ExpensesSection({ householdId, roommates, onHouseholdAccessError }) {
                                     key={b.roommateId}
                                     style={{
                                         padding: "0.85rem 1rem",
-                                        borderRadius: "12px",
-                                        border: "1px solid rgba(102, 126, 234, 0.2)",
-                                        background: "rgba(255, 255, 255, 0.03)",
-                                        backdropFilter: "blur(20px)",
-                                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+                                        borderRadius: "var(--radius-lg)",
+                                        border: "1px solid var(--color-border)",
+                                        background: "var(--color-surface)",
+                                        boxShadow: "var(--shadow-card)",
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "space-between",
@@ -314,14 +313,13 @@ function ExpensesSection({ householdId, roommates, onHouseholdAccessError }) {
                                         style={{
                                             fontSize: "1.1rem",
                                             fontWeight: 800,
-                                            color: negative ? "#fca5a5" : positive ? "#86efac" : "var(--text-dark)",
-                                            background: negative ? "rgba(248, 113, 113, 0.15)" : positive ? "rgba(34, 197, 94, 0.15)" : "rgba(255, 255, 255, 0.05)",
-                                            border: negative ? "1px solid rgba(248, 113, 113, 0.3)" : positive ? "1px solid rgba(34, 197, 94, 0.3)" : "1px solid rgba(102, 126, 234, 0.2)",
+                                            color: negative ? "var(--color-danger)" : positive ? "var(--color-success)" : "var(--color-text)",
+                                            background: negative ? "var(--color-danger-surface)" : positive ? "var(--color-success-surface)" : "var(--color-surface-muted)",
+                                            border: negative ? "1px solid color-mix(in srgb, var(--color-danger), transparent 70%)" : positive ? "1px solid color-mix(in srgb, var(--color-success), transparent 70%)" : "1px solid var(--color-border)",
                                             padding: "0.5rem 0.9rem",
                                             borderRadius: "8px",
                                             minWidth: "90px",
                                             textAlign: "right",
-                                            backdropFilter: "blur(10px)"
                                         }}
                                     >
                                         {negative ? "−" : positive ? "+" : ""}${Math.abs(b.balance).toFixed(2)}
@@ -352,7 +350,7 @@ function ExpensesSection({ householdId, roommates, onHouseholdAccessError }) {
                             <li key={exp._id} className="list-item">
                                 <div className="list-item-content">
                                     <div className="list-item-title">
-                                        {exp.description} <span style={{ color: "var(--primary)", fontWeight: "700" }}>
+                                        {exp.description} <span style={{ color: "var(--color-text)", fontWeight: "700" }}>
                                             ${Number(exp.amount).toFixed(2)}
                                         </span>
                                     </div>

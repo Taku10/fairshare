@@ -3,46 +3,37 @@
   display: grid;
   place-items: center;
   padding: 2.5rem 1.5rem;
-  background: radial-gradient(circle at 20% 20%, rgba(116, 121, 159, 0.1), transparent 35%),
-    radial-gradient(circle at 80% 10%, rgba(98, 104, 143, 0.06), transparent 30%),
-    linear-gradient(135deg, var(--color-page) 0%, #f0f0f7 60%, #e9edf5 100%);
+  background: radial-gradient(circle at 20% 20%, rgba(229, 138, 84, 0.08), transparent 35%),
+    linear-gradient(135deg, var(--color-page), var(--color-surface-muted));
   position: relative;
   overflow: hidden;
 }
 
 .auth-glow {
-  position: absolute;
-  width: 420px;
-  height: 420px;
-  filter: blur(120px);
-  opacity: 0.7;
-  pointer-events: none;
-  animation: drift 12s ease-in-out infinite alternate;
+  display: none;
 }
 
 .auth-glow-1 {
-  background: rgba(116, 121, 159, 0.25);
+  background: rgba(229, 138, 84, 0.16);
   top: -80px;
   left: -60px;
 }
 
 .auth-glow-2 {
-  background: rgba(98, 104, 143, 0.2);
+  background: rgba(217, 119, 69, 0.12);
   bottom: -100px;
   right: -40px;
-  animation-delay: 2s;
 }
 
 .auth-card {
   width: min(480px, 100%);
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: 18px;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow: 0 25px 50px rgba(15, 23, 42, 0.08);
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-overlay);
   padding: 2.25rem;
   position: relative;
-  backdrop-filter: blur(10px);
-  animation: floatUp 0.6s ease;
+  animation: floatUp var(--duration-page) var(--ease-smooth);
 }
 
 .auth-head {
@@ -57,10 +48,10 @@
   align-items: center;
   gap: 0.35rem;
   padding: 0.35rem 0.85rem;
-  background: rgba(98, 104, 143, 0.1);
-  border: 1px solid rgba(98, 104, 143, 0.2);
-  color: var(--primary-dark);
-  border-radius: 999px;
+  background: var(--color-primary-light);
+  border: 1px solid color-mix(in srgb, var(--color-primary), transparent 72%);
+  color: var(--color-action);
+  border-radius: var(--radius-pill);
   font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -75,12 +66,12 @@
   border-radius: 10px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: color var(--duration-fast) var(--ease-smooth), border-color var(--duration-fast) var(--ease-smooth), transform var(--duration-fast) var(--ease-smooth);
 }
 
 .auth-back:hover {
   color: var(--text-dark);
-  border-color: var(--color-accent);
+  border-color: var(--color-primary);
   transform: translateY(-1px);
 }
 
@@ -98,13 +89,19 @@
 }
 
 .auth-alert {
-  background: rgba(239, 68, 68, 0.1);
+  background: var(--color-danger-surface);
   color: var(--danger);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  border: 1px solid color-mix(in srgb, var(--color-danger), transparent 70%);
   border-radius: 10px;
   padding: 0.75rem 1rem;
   margin-bottom: 1rem;
-  animation: pulseIn 0.3s ease;
+  animation: pulseIn var(--duration-page) var(--ease-smooth);
+}
+
+.auth-alert--config {
+  background: var(--color-warning-surface);
+  color: var(--color-warning);
+  border-color: color-mix(in srgb, var(--color-warning), transparent 70%);
 }
 
 .auth-form {
@@ -120,7 +117,7 @@
   gap: 0.4rem;
   font-weight: 600;
   color: var(--text-dark);
-  animation: fadeSlide 0.4s ease;
+  animation: fadeSlide var(--duration-page) var(--ease-smooth);
 }
 
 .auth-field span {
@@ -133,12 +130,12 @@
   justify-content: center;
   height: 48px;
   border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(62, 66, 104, 0.16);
+  box-shadow: 0 4px 12px rgba(120, 55, 22, 0.14);
 }
 
 .auth-submit:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(62, 66, 104, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(120, 55, 22, 0.18);
 }
 
 .auth-footer {
@@ -151,38 +148,29 @@
 
 .auth-toggle {
   background: transparent;
-  border: 1px solid rgba(98, 104, 143, 0.3);
-  color: var(--primary-dark);
+  border: 1px solid color-mix(in srgb, var(--color-primary), transparent 45%);
+  color: var(--color-action);
   padding: 0.65rem 0.95rem;
   border-radius: 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color var(--duration-fast) var(--ease-smooth), border-color var(--duration-fast) var(--ease-smooth), box-shadow var(--duration-fast) var(--ease-smooth), transform var(--duration-fast) var(--ease-smooth);
 }
 
 .auth-toggle:hover {
-  background: rgba(98, 104, 143, 0.08);
+  background: var(--color-primary-light);
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(62, 66, 104, 0.12);
+  box-shadow: 0 4px 12px rgba(120, 55, 22, 0.1);
 }
 
 @keyframes floatUp {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.98);
+    transform: translateY(6px) scale(0.99);
   }
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes drift {
-  from {
-    transform: translateY(0) translateX(0) scale(1);
-  }
-  to {
-    transform: translateY(-20px) translateX(10px) scale(1.05);
   }
 }
 
