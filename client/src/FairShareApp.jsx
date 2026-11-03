@@ -7,7 +7,7 @@ import ChoresSection from "./components/ChoresSection";
 import ExpensesSection from "./components/ExpensesSection";
 import Button from "./components/Button";
 import Card from "./components/Card";
-import EmptyState from "./components/EmptyState";
+import HouseholdOnboarding from "./components/HouseholdOnboarding";
 import PageHeader from "./components/PageHeader";
 import ProfileSection from "./components/ProfileSection";
 import RoommatesSection from "./components/RoommatesSection";
@@ -94,6 +94,8 @@ function FairShareApp() {
   );
   const isHouseholdOwner = Boolean(profile?._id) &&
     String(activeHousehold?.createdBy?._id || activeHousehold?.createdBy) === String(profile._id);
+
+  const showOnboarding = !householdsLoading && households.length === 0 && !householdError;
 
   function selectHousehold(householdId) {
     setActiveHouseholdId(householdId);
@@ -295,14 +297,9 @@ function FairShareApp() {
           </nav>
         </aside>
         <div className="app-shell__main">
+      {showOnboarding ? null : (
       <Card as="section" className="household-actions" aria-label="Household actions">
         {householdError && <StatusMessage variant="error">{householdError}</StatusMessage>}
-        {!householdsLoading && households.length === 0 && (
-          <EmptyState
-            title="Welcome to FairShare"
-            description="Create a household or join one with an invite code to get started."
-          />
-        )}
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginTop: "0.75rem" }}>
           <form onSubmit={handleCreateHousehold} style={{ display: "flex", flex: "1 1 260px", gap: "0.5rem" }}>
             <input
@@ -356,6 +353,7 @@ function FairShareApp() {
           </div>
         )}
       </Card>
+      )}
 
       {/* Profile Modal */}
       {showProfile && (
@@ -381,9 +379,13 @@ function FairShareApp() {
       )}
 
       <main className="content">
-        <PageHeader title={activePage.title} description={activePage.description} />
+        {showOnboarding ? (
+          <HouseholdOnboarding onComplete={(householdId) => loadHouseholds(householdId)} />
+        ) : (
+          <PageHeader title={activePage.title} description={activePage.description} />
+        )}
         {householdsLoading && <div className="loading">Loading households...</div>}
-        {!householdsLoading && !activeHousehold && (
+        {!householdsLoading && !activeHousehold && !showOnboarding && (
           <div className="empty-state">
             <p className="empty-state-text">Select or create a household to see its chores, expenses, members, and chat.</p>
           </div>

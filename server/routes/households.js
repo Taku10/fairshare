@@ -74,6 +74,26 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Preview a household from an invite code without joining it
+router.get('/join/:code', async (req, res) => {
+  const invalid = () => res.status(404).json({ error: 'Invalid or expired invite code' });
+  try {
+    const code = String(req.params.code || '').trim().toUpperCase();
+    if (!CODE_PATTERN.test(code)) return invalid();
+
+    const household = await Household.findOne({ code, codeExpiresAt: { $gt: new Date() } });
+    if (!household) return invalid();
+
+    res.json({
+      _id: household._id,
+      name: household.name,
+      memberCount: Array.isArray(household.members) ? household.members.length : 0,
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to look up invite code' });
+  }
+});
+
 // Join a household by invite code
 router.post('/join/:code', async (req, res) => {
   const invalid = () => res.status(404).json({ error: 'Invalid or expired invite code' });

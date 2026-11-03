@@ -211,6 +211,23 @@ test('joining requires a valid, unexpired, unrevoked code', async (t) => {
   assert.ok(memberships.some((m) => String(m.userId) === String(outsider) && m.role === 'member'));
 });
 
+test('previewing an invite exposes only the name and size, and does not join', async (t) => {
+  const { call, memberships, households } = await setup(t);
+  const preview = (code) => call('GET', `/api/households/join/${code}`, outsider);
+
+  assert.equal((await preview('abc')).status, 404);
+  assert.equal((await preview('AAAAAAAAAA')).status, 404);
+
+  households[0].codeExpiresAt = new Date(Date.now() + 3600e3);
+  const ok = await preview(VALID);
+  assert.equal(ok.status, 200);
+  assert.deepEqual(Object.keys(ok.body).sort(), ['_id', 'memberCount', 'name']);
+  assert.equal(memberships.filter((m) => String(m.userId) === String(outsider)).length, 0);
+
+  households[0].codeExpiresAt = new Date(Date.now() - 1000);
+  assert.equal((await preview(VALID)).status, 404);
+});
+
 test('rotating replaces the old code and revoking stops joins', async (t) => {
   const { call } = await setup(t);
   const fresh = await call('POST', `/api/households/${hhA}/invite`, owner);
